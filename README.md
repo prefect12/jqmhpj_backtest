@@ -121,13 +121,6 @@ pytest --cov=app tests/
 - API规范: api_specification.md
 - 测试规范: testing_guidelines.md
 
-## 后续优化
-
-- [ ] 添加更多技术指标
-- [ ] 支持中国A股市场
-- [ ] 实现投资组合优化功能
-- [ ] 添加基准对比功能
-- [ ] 支持导出Excel/PDF报告
 
 ## 许可证
 
