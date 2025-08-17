@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>回测结果 - 含交易记录</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .result-container {
+            max-width: 1400px;
+            margin: 30px auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            overflow: hidden;
+        }
+        
+        .result-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .result-body {
+            padding: 40px;
+        }
+        
+        .metric-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+            border: 1px solid #e9ecef;
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .metric-title {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-bottom: 10px;
+        }
+        
+        .metric-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .metric-value.positive {
+            color: #28a745;
+        }
+        
+        .metric-value.negative {
+            color: #dc3545;
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+        
+        .chart-container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        
+        .transaction-table {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        
+        .transaction-table table {
+            width: 100%;
+            margin: 0;
+        }
+        
+        .transaction-table th {
+            background: #f8f9fa;
+            color: #495057;
+            font-weight: 600;
+            padding: 12px;
+            border-bottom: 2px solid #dee2e6;
+        }
+        
+        .transaction-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .transaction-table tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .buy-reason {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        .reason-price-drop {
+            background: #ffeaa7;
+            color: #fdcb6e;
+        }
+        
+        .reason-drawdown {
+            background: #fd79a8;
+            color: #e84393;
+        }
+        
+        .reason-vix {
+            background: #a29bfe;
+            color: #6c5ce7;
+        }
+        
+        .reason-rsi {
+            background: #81ecec;
+            color: #00b894;
+        }
+        
+        .reason-macd {
+            background: #74b9ff;
+            color: #0984e3;
+        }
+        
+        .reason-support {
+            background: #fdcb6e;
+            color: #f39c12;
+        }
+        
+        .reason-initial {
+            background: #dfe6e9;
+            color: #636e72;
+        }
+        
+        .transaction-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        .nav-tabs .nav-link {
+            color: #6c757d;
+            border: none;
+            padding: 10px 20px;
+        }
+        
+        .nav-tabs .nav-link.active {
+            color: #667eea;
+            background: none;
+            border-bottom: 3px solid #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="result-container">
+        <div class="result-header">
+            <h1><i class="bi bi-graph-up"></i> 回测结果分析</h1>
+            <p class="mb-0">包含详细交易记录和买入信号分析</p>
+        </div>
+        
+        <div class="result-body">
+            <!-- 导航标签 -->
+            <ul class="nav nav-tabs mb-4" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" data-bs-toggle="tab" href="#overview">总览</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-bs-toggle="tab" href="#transactions">交易记录</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-bs-toggle="tab" href="#statistics">统计分析</a>
+                </li>
+            </ul>
+            
+            <!-- 标签内容 -->
+            <div class="tab-content">
+                <!-- 总览标签 -->
+                <div class="tab-pane fade show active" id="overview">
+                    <!-- 核心指标 -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="metric-card">
+                                <div class="metric-title">总收益率</div>
+                                <div class="metric-value positive" id="totalReturn">+0.00%</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="metric-card">
+                                <div class="metric-title">年化收益率</div>
+                                <div class="metric-value positive" id="annualReturn">+0.00%</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="metric-card">
+                                <div class="metric-title">最大回撤</div>
+                                <div class="metric-value negative" id="maxDrawdown">-0.00%</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="metric-card">
+                                <div class="metric-title">夏普比率</div>
+                                <div class="metric-value" id="sharpeRatio">0.00</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 投资组合增长图 -->
+                    <div class="chart-container">
+                        <h3 class="section-title">投资组合增长曲线</h3>
+                        <canvas id="growthChart" height="100"></canvas>
+                    </div>
+                </div>
+                
+                <!-- 交易记录标签 -->
+                <div class="tab-pane fade" id="transactions">
+                    <!-- 交易统计 -->
+                    <div class="transaction-stats" id="transactionStats">
+                        <div class="stat-card">
+                            <div class="stat-value" id="totalTransactions">0</div>
+                            <div class="stat-label">总交易次数</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="buyCount">0</div>
+                            <div class="stat-label">买入次数</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="totalBuyAmount">$0</div>
+                            <div class="stat-label">总买入金额</div>
+                        </div>
+                    </div>
+                    
+                    <!-- 交易记录表格 -->
+                    <div class="transaction-table">
+                        <h3 class="section-title px-3 pt-3">详细交易记录</h3>
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>日期</th>
+                                    <th>股票</th>
+                                    <th>类型</th>
+                                    <th>数量</th>
+                                    <th>价格</th>
+                                    <th>金额</th>
+                                    <th>买入原因</th>
+                                    <th>详情</th>
+                                </tr>
+                            </thead>
+                            <tbody id="transactionTableBody">
+                                <!-- 动态填充 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- 统计分析标签 -->
+                <div class="tab-pane fade" id="statistics">
+                    <!-- 按原因统计 -->
+                    <div class="chart-container">
+                        <h3 class="section-title">买入原因分布</h3>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <canvas id="reasonChart"></canvas>
+                            </div>
+                            <div class="col-md-6">
+                                <div id="reasonStats">
+                                    <!-- 动态填充原因统计 -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 按月统计 -->
+                    <div class="chart-container">
+                        <h3 class="section-title">月度交易统计</h3>
+                        <canvas id="monthlyChart" height="80"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+    // 全局变量
+    let backtestData = null;
+    let growthChart = null;
+    let reasonChart = null;
+    let monthlyChart = null;
+    
+    // 初始化
+    $(document).ready(function() {
+        // 从localStorage获取数据或通过API获取
+        const storedData = localStorage.getItem('backtestResult');
+        if (storedData) {
+            backtestData = JSON.parse(storedData);
+            displayResults(backtestData);
+        }
+    });
+    
+    // 显示结果
+    function displayResults(data) {
+        if (!data) return;
+        
+        // 更新核心指标
+        updateMetrics(data);
+        
+        // 创建图表
+        createGrowthChart(data);
+        
+        // 显示交易记录
+        displayTransactions(data);
+        
+        // 创建统计图表
+        createStatisticsCharts(data);
+    }
+    
+    // 更新核心指标
+    function updateMetrics(data) {
+        const perf = data.performance_summary || {};
+        const risk = data.risk_metrics || {};
+        
+        $('#totalReturn').text(formatPercent(perf.total_return_pct));
+        $('#annualReturn').text(formatPercent(perf.annualized_return_pct));
+        $('#maxDrawdown').text(formatPercent(risk.max_drawdown_pct));
+        $('#sharpeRatio').text(formatNumber(risk.sharpe_ratio));
+        
+        // 更新颜色
+        updateValueColor('#totalReturn', perf.total_return_pct);
+        updateValueColor('#annualReturn', perf.annualized_return_pct);
+    }
+    
+    // 创建增长图表
+    function createGrowthChart(data) {
+        const ctx = document.getElementById('growthChart').getContext('2d');
+        const values = data.portfolio_values || [];
+        
+        if (growthChart) growthChart.destroy();
+        
+        growthChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: values.map(v => v.date),
+                datasets: [{
+                    label: '投资组合价值',
+                    data: values.map(v => v.value),
+                    borderColor: '#667eea',
+                    backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return '价值: ' + formatCurrency(context.parsed.y);
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        ticks: {
+                            callback: function(value) {
+                                return formatCurrency(value);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    // 显示交易记录
+    function displayTransactions(data) {
+        const transactions = data.transactions || [];
+        const summary = data.transaction_summary || {};
+        
+        // 更新统计
+        $('#totalTransactions').text(transactions.length);
+        $('#buyCount').text(summary.buy_count || 0);
+        $('#totalBuyAmount').text(formatCurrency(summary.total_buy_amount || 0));
+        
+        // 填充表格
+        const tbody = $('#transactionTableBody');
+        tbody.empty();
+        
+        transactions.forEach(t => {
+            const reasonClass = getReasonClass(t.reason_code);
+            const row = `
+                <tr>
+                    <td>${t.date}</td>
+                    <td><strong>${t.symbol}</strong></td>
+                    <td>${t.type === 'buy' ? '买入' : '卖出'}</td>
+                    <td>${formatNumber(t.shares)}</td>
+                    <td>${formatCurrency(t.price)}</td>
+                    <td>${formatCurrency(t.amount)}</td>
+                    <td><span class="buy-reason ${reasonClass}">${t.reason}</span></td>
+                    <td>${formatDetails(t.details)}</td>
+                </tr>
+            `;
+            tbody.append(row);
+        });
+    }
+    
+    // 创建统计图表
+    function createStatisticsCharts(data) {
+        const summary = data.transaction_summary || {};
+        const reasonStats = summary.reason_statistics || {};
+        
+        // 原因分布饼图
+        if (Object.keys(reasonStats).length > 0) {
+            const ctx = document.getElementById('reasonChart').getContext('2d');
+            
+            if (reasonChart) reasonChart.destroy();
+            
+            reasonChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(reasonStats).map(r => getReasonLabel(r)),
+                    datasets: [{
+                        data: Object.values(reasonStats).map(r => r.count),
+                        backgroundColor: [
+                            '#667eea', '#764ba2', '#f093fb', '#4facfe',
+                            '#43e97b', '#fa709a', '#fee140', '#30cfd0'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+            
+            // 显示原因统计详情
+            const statsHtml = Object.entries(reasonStats).map(([reason, stats]) => `
+                <div class="mb-2">
+                    <strong>${getReasonLabel(reason)}</strong>: 
+                    ${stats.count}次, 
+                    总金额: ${formatCurrency(stats.total_amount)}
+                </div>
+            `).join('');
+            $('#reasonStats').html(statsHtml);
+        }
+    }
+    
+    // 辅助函数
+    function formatPercent(value) {
+        const num = parseFloat(value) || 0;
+        const sign = num >= 0 ? '+' : '';
+        return sign + num.toFixed(2) + '%';
+    }
+    
+    function formatNumber(value) {
+        return (parseFloat(value) || 0).toFixed(2);
+    }
+    
+    function formatCurrency(value) {
+        return '$' + (parseFloat(value) || 0).toFixed(2);
+    }
+    
+    function updateValueColor(selector, value) {
+        const element = $(selector);
+        element.removeClass('positive negative');
+        if (value > 0) {
+            element.addClass('positive');
+        } else if (value < 0) {
+            element.addClass('negative');
+        }
+    }
+    
+    function getReasonClass(reason) {
+        const map = {
+            '初始买入': 'reason-initial',
+            '价格下跌': 'reason-price-drop',
+            '回撤触发': 'reason-drawdown',
+            'VIX高位': 'reason-vix',
+            'RSI超卖': 'reason-rsi',
+            'MACD金叉': 'reason-macd',
+            '支撑位': 'reason-support'
+        };
+        return map[reason] || 'reason-initial';
+    }
+    
+    function getReasonLabel(reason) {
+        const map = {
+            'initial': '初始买入',
+            'price_drop': '价格下跌',
+            'drawdown': '回撤触发',
+            'vix_high': 'VIX高位',
+            'rsi_oversold': 'RSI超卖',
+            'macd_golden_cross': 'MACD金叉',
+            'support_level': '支撑位'
+        };
+        return map[reason] || reason;
+    }
+    
+    function formatDetails(details) {
+        if (!details || Object.keys(details).length === 0) {
+            return '-';
+        }
+        return Object.entries(details)
+            .map(([key, value]) => `${key}: ${value}`)
+            .join(', ');
+    }
+    </script>
+</body>
+</html>

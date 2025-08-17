@@ -6,6 +6,7 @@ from flask import Blueprint, request, jsonify, send_file, make_response
 from app.services.backtest_service import BacktestService
 from app.services.dca_service import DCAService
 from app.services.export_service import ExportService
+from app.services.backtest_service_enhanced import EnhancedBacktestService
 from app.dao.backtest_dao import BacktestDAO
 from app.dao.portfolio_dao import PortfolioDAO
 from app.dao.stock_data_dao import StockDataDAO
@@ -14,6 +15,7 @@ import json
 
 backtest_bp = Blueprint('backtest', __name__)
 backtest_service = BacktestService()
+enhanced_backtest_service = EnhancedBacktestService()
 dca_service = DCAService()
 export_service = ExportService()
 backtest_dao = BacktestDAO()
@@ -200,6 +202,36 @@ def get_batch_stock_info():
                 results[symbol] = {'error': 'Failed to fetch info'}
         
         return jsonify(results), 200
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@backtest_bp.route('/api/backtest/run/enhanced', methods=['POST'])
+def run_enhanced_backtest():
+    """执行增强版回测（包含交易记录）"""
+    try:
+        data = request.json
+        
+        # 验证请求数据
+        if not data:
+            return jsonify({'error': 'No data provided'}), 400
+        
+        # 设置默认买入条件
+        if 'buy_conditions' not in data:
+            data['buy_conditions'] = {
+                'daily_drop_threshold': -0.05,  # 日跌幅5%
+                'drawdown_threshold': -0.10,    # 回撤10%
+                'vix_threshold': 30,             # VIX > 30
+                'rsi_oversold': 30,              # RSI < 30
+                'enable_macd': True,             # 启用MACD金叉
+                'enable_support': True           # 启用支撑位
+            }
+        
+        # 执行增强版回测
+        result = enhanced_backtest_service.run_backtest_with_transactions(data)
+        
+        return jsonify(result), 200
         
     except Exception as e:
         return jsonify({'error': str(e)}), 500
