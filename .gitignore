@@ -1,0 +1,159 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environment
+venv/
+ENV/
+env/
+backtest_env/
+
+# PyCharm
+.idea/
+
+# VS Code
+.vscode/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Environment Variables (包含敏感信息)
+.env
+.env.local
+.env.production
+.env.development
+.env.testing
+*.env
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+backtest.db
+backtest_dev.db
+backtest_prod.db
+backtest_test.db
+
+# Logs
+*.log
+logs/
+log/
+
+# Cache
+cache/
+.cache/
+*.cache
+
+# Test Coverage
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+*~
+
+# Upload files
+uploads/
+upload/
+
+# Static files (if generated)
+staticfiles/
+collected_static/
+
+# Node modules (if using any frontend tools)
+node_modules/
+
+# Distribution
+dist/
+build/
+
+# IDE specific files
+*.sublime-project
+*.sublime-workspace
+
+# API Keys and Secrets
+secrets.json
+credentials.json
+config.json
+
+# Data files
+data/cache/
+*.csv
+*.xlsx
+*.xls
+
+# Backup files
+*.backup
+*.old
+
+# Documentation build
+docs/_build/
+docs/.build/
+
+# pyenv
+.python-version
+
+# pipenv
+Pipfile.lock
+
+# celery
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath parsed files
+*.sage.py
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/

@@ -1,0 +1,593 @@
+{% extends "base.html" %}
+
+{% block title %}定投计划 - 股票回测分析系统{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dca-type-card {
+        cursor: pointer;
+        transition: all 0.3s;
+        border: 2px solid transparent;
+    }
+    
+    .dca-type-card:hover {
+        border-color: var(--primary-blue);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    .dca-type-card.selected {
+        border-color: var(--primary-blue);
+        background-color: #f0f7ff;
+    }
+    
+    .condition-item {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+    }
+    
+    .timeline-preview {
+        height: 200px;
+        background: linear-gradient(to bottom, #f0f7ff 0%, #ffffff 100%);
+        border-radius: 8px;
+        padding: 20px;
+        overflow-y: auto;
+    }
+    
+    .investment-date {
+        display: inline-block;
+        padding: 4px 8px;
+        background: var(--primary-blue);
+        color: white;
+        border-radius: 4px;
+        margin: 2px;
+        font-size: 0.85rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">定投计划设置</h2>
+
+<!-- 定投类型选择 -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card dca-type-card" onclick="selectDCAType('periodic')">
+            <div class="card-body text-center">
+                <i class="fas fa-calendar-alt fa-3x text-primary mb-3"></i>
+                <h5>定期定投</h5>
+                <p class="text-muted">按固定时间间隔投资固定金额</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card dca-type-card" onclick="selectDCAType('conditional')">
+            <div class="card-body text-center">
+                <i class="fas fa-chart-line fa-3x text-info mb-3"></i>
+                <h5>条件定投</h5>
+                <p class="text-muted">根据市场条件触发投资</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 定投配置表单 -->
+<form id="dcaForm">
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- 基础配置 -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5 class="mb-0">基础配置</h5>
+                </div>
+                <div class="card-body">
+                    <!-- 投资组合选择 -->
+                    <div class="mb-3">
+                        <label class="form-label">投资组合</label>
+                        <div id="portfolioSelection">
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle"></i> 
+                                请先在<a href="/portfolio">投资组合配置</a>页面创建组合
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 时间范围 -->
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="dcaStartDate" class="form-label">开始日期</label>
+                            <input type="date" class="form-control" id="dcaStartDate" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="dcaEndDate" class="form-label">结束日期</label>
+                            <input type="date" class="form-control" id="dcaEndDate" required>
+                        </div>
+                    </div>
+                    
+                    <!-- 初始金额 -->
+                    <div class="mb-3">
+                        <label for="dcaInitialAmount" class="form-label">初始投资金额 ($)</label>
+                        <input type="number" class="form-control" id="dcaInitialAmount" 
+                               value="10000" min="0" max="1000000">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 定期定投配置 -->
+            <div class="card mb-3" id="periodicConfig" style="display:none;">
+                <div class="card-header">
+                    <h5 class="mb-0">定期定投设置</h5>
+                </div>
+                <div class="card-body">
+                    <!-- 投资频率 -->
+                    <div class="mb-3">
+                        <label for="investmentFrequency" class="form-label">投资频率</label>
+                        <select class="form-select" id="investmentFrequency" onchange="updateFrequencyConfig()">
+                            <option value="daily">每日</option>
+                            <option value="weekly">每周</option>
+                            <option value="biweekly">双周</option>
+                            <option value="monthly" selected>每月</option>
+                        </select>
+                    </div>
+                    
+                    <!-- 频率详细配置 -->
+                    <div id="frequencyDetails">
+                        <div class="mb-3">
+                            <label for="dayOfMonth" class="form-label">每月投资日</label>
+                            <input type="number" class="form-control" id="dayOfMonth" 
+                                   value="1" min="1" max="31">
+                            <small class="text-muted">每月的第几天进行投资</small>
+                        </div>
+                    </div>
+                    
+                    <!-- 每次投资金额 -->
+                    <div class="mb-3">
+                        <label for="periodicAmount" class="form-label">每次投资金额 ($)</label>
+                        <input type="number" class="form-control" id="periodicAmount" 
+                               value="1000" min="100" max="100000" required>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 条件定投配置 -->
+            <div class="card mb-3" id="conditionalConfig" style="display:none;">
+                <div class="card-header">
+                    <h5 class="mb-0">条件定投设置</h5>
+                </div>
+                <div class="card-body">
+                    <div id="conditionsList">
+                        <!-- 条件将动态添加 -->
+                    </div>
+                    
+                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="addCondition()">
+                        <i class="fas fa-plus"></i> 添加触发条件
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 右侧预览 -->
+        <div class="col-lg-4">
+            <!-- 投资计划预览 -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h6 class="mb-0">投资计划预览</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center mb-3">
+                        <div class="col-6">
+                            <div class="metric-label">预计投资次数</div>
+                            <div class="metric-value text-primary" id="expectedCount">0</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="metric-label">预计总投入</div>
+                            <div class="metric-value text-primary" id="expectedTotal">$0</div>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-preview" id="timelinePreview">
+                        <p class="text-muted text-center">配置后显示投资时间线</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 策略说明 -->
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">策略说明</h6>
+                </div>
+                <div class="card-body">
+                    <div id="strategyDescription">
+                        <p class="mb-0">请选择定投类型以查看策略说明</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 提交按钮 -->
+    <div class="mt-4">
+        <button type="submit" class="btn btn-primary btn-lg">
+            <i class="fas fa-play"></i> 执行定投回测
+        </button>
+        <button type="button" class="btn btn-secondary btn-lg ms-2" onclick="saveDCAPlan()">
+            <i class="fas fa-save"></i> 保存计划
+        </button>
+    </div>
+</form>
+
+<!-- 条件模板 -->
+<template id="conditionTemplate">
+    <div class="condition-item">
+        <div class="row">
+            <div class="col-md-4">
+                <label class="form-label">触发类型</label>
+                <select class="form-select condition-type">
+                    <option value="price_drop">价格下跌</option>
+                    <option value="drawdown">回撤触发</option>
+                    <option value="rsi">RSI超卖</option>
+                    <option value="valuation">估值触发</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">阈值</label>
+                <div class="input-group">
+                    <input type="number" class="form-control condition-threshold" 
+                           value="3" min="0" max="100" step="0.1">
+                    <span class="input-group-text">%</span>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">投资金额</label>
+                <input type="number" class="form-control condition-amount" 
+                       value="2000" min="100" max="100000">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">&nbsp;</label>
+                <button type="button" class="btn btn-danger btn-sm w-100" 
+                        onclick="removeCondition(this)">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        </div>
+        <div class="row mt-2">
+            <div class="col-md-6">
+                <label class="form-label">冷却期（天）</label>
+                <input type="number" class="form-control condition-cooldown" 
+                       value="7" min="0" max="365">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">回看期（天）</label>
+                <input type="number" class="form-control condition-lookback" 
+                       value="30" min="1" max="365">
+            </div>
+        </div>
+    </div>
+</template>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let selectedDCAType = null;
+let conditionCount = 0;
+
+$(document).ready(function() {
+    // 设置默认日期
+    const today = new Date();
+    const oneYearAgo = new Date(today);
+    oneYearAgo.setFullYear(today.getFullYear() - 1);
+    
+    $('#dcaEndDate').val(today.toISOString().split('T')[0]);
+    $('#dcaStartDate').val(oneYearAgo.toISOString().split('T')[0]);
+    
+    // 加载已保存的投资组合
+    loadPortfolios();
+    
+    // 默认选择定期定投
+    selectDCAType('periodic');
+});
+
+// 选择定投类型
+function selectDCAType(type) {
+    selectedDCAType = type;
+    
+    // 更新UI
+    $('.dca-type-card').removeClass('selected');
+    if (type === 'periodic') {
+        $('.dca-type-card').eq(0).addClass('selected');
+        $('#periodicConfig').show();
+        $('#conditionalConfig').hide();
+        updateStrategyDescription('periodic');
+    } else {
+        $('.dca-type-card').eq(1).addClass('selected');
+        $('#periodicConfig').hide();
+        $('#conditionalConfig').show();
+        updateStrategyDescription('conditional');
+        
+        // 添加默认条件
+        if ($('#conditionsList').children().length === 0) {
+            addCondition();
+        }
+    }
+    
+    updatePreview();
+}
+
+// 更新频率配置
+function updateFrequencyConfig() {
+    const frequency = $('#investmentFrequency').val();
+    let detailsHtml = '';
+    
+    switch(frequency) {
+        case 'daily':
+            detailsHtml = `
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="tradingDaysOnly" checked>
+                    <label class="form-check-label" for="tradingDaysOnly">
+                        仅交易日
+                    </label>
+                </div>
+            `;
+            break;
+        case 'weekly':
+            detailsHtml = `
+                <label class="form-label">每周投资日</label>
+                <select class="form-select" id="dayOfWeek">
+                    <option value="1">周一</option>
+                    <option value="2">周二</option>
+                    <option value="3">周三</option>
+                    <option value="4">周四</option>
+                    <option value="5">周五</option>
+                </select>
+            `;
+            break;
+        case 'monthly':
+            detailsHtml = `
+                <label for="dayOfMonth" class="form-label">每月投资日</label>
+                <input type="number" class="form-control" id="dayOfMonth" 
+                       value="1" min="1" max="31">
+                <small class="text-muted">每月的第几天进行投资</small>
+            `;
+            break;
+    }
+    
+    $('#frequencyDetails').html(detailsHtml);
+    updatePreview();
+}
+
+// 添加条件
+function addCondition() {
+    conditionCount++;
+    const template = document.getElementById('conditionTemplate');
+    const clone = template.content.cloneNode(true);
+    $('#conditionsList').append(clone);
+}
+
+// 移除条件
+function removeCondition(btn) {
+    $(btn).closest('.condition-item').remove();
+}
+
+// 更新预览
+function updatePreview() {
+    if (selectedDCAType === 'periodic') {
+        updatePeriodicPreview();
+    } else {
+        updateConditionalPreview();
+    }
+}
+
+// 更新定期定投预览
+function updatePeriodicPreview() {
+    const frequency = $('#investmentFrequency').val();
+    const amount = parseFloat($('#periodicAmount').val()) || 1000;
+    const initialAmount = parseFloat($('#dcaInitialAmount').val()) || 0;
+    
+    // 计算预期投资次数
+    const startDate = new Date($('#dcaStartDate').val());
+    const endDate = new Date($('#dcaEndDate').val());
+    const months = (endDate.getFullYear() - startDate.getFullYear()) * 12 
+                  + (endDate.getMonth() - startDate.getMonth());
+    
+    let count = 0;
+    switch(frequency) {
+        case 'daily': count = Math.floor(months * 22); break; // 约22个交易日/月
+        case 'weekly': count = Math.floor(months * 4.33); break;
+        case 'biweekly': count = Math.floor(months * 2.17); break;
+        case 'monthly': count = months; break;
+    }
+    
+    const totalInvestment = initialAmount + (count * amount);
+    
+    $('#expectedCount').text(count);
+    $('#expectedTotal').text(formatCurrency(totalInvestment));
+    
+    // 显示投资日期示例
+    let previewHtml = '<h6>投资日期示例：</h6>';
+    const dates = generateInvestmentDates(startDate, endDate, frequency, 10);
+    dates.forEach(date => {
+        previewHtml += `<span class="investment-date">${date}</span> `;
+    });
+    
+    $('#timelinePreview').html(previewHtml);
+}
+
+// 更新条件定投预览
+function updateConditionalPreview() {
+    const conditions = $('.condition-item').length;
+    const avgAmount = 2000; // 假设平均投资金额
+    const expectedTriggers = conditions * 5; // 假设每个条件触发5次
+    
+    const initialAmount = parseFloat($('#dcaInitialAmount').val()) || 0;
+    const totalInvestment = initialAmount + (expectedTriggers * avgAmount);
+    
+    $('#expectedCount').text('~' + expectedTriggers);
+    $('#expectedTotal').text('~' + formatCurrency(totalInvestment));
+    
+    let previewHtml = '<h6>触发条件：</h6>';
+    $('.condition-item').each(function() {
+        const type = $(this).find('.condition-type').val();
+        const threshold = $(this).find('.condition-threshold').val();
+        previewHtml += `<div class="mb-1">• ${getConditionName(type)} ${threshold}%</div>`;
+    });
+    
+    $('#timelinePreview').html(previewHtml);
+}
+
+// 更新策略说明
+function updateStrategyDescription(type) {
+    let description = '';
+    
+    if (type === 'periodic') {
+        description = `
+            <h6>定期定投策略</h6>
+            <ul class="small mb-0">
+                <li>按固定时间间隔投资</li>
+                <li>不考虑市场价格波动</li>
+                <li>适合长期投资者</li>
+                <li>可平滑成本，降低择时风险</li>
+            </ul>
+        `;
+    } else {
+        description = `
+            <h6>条件定投策略</h6>
+            <ul class="small mb-0">
+                <li>根据市场条件触发投资</li>
+                <li>在市场下跌时加大投入</li>
+                <li>需要设置触发条件和冷却期</li>
+                <li>可能获得更好的买入价格</li>
+            </ul>
+        `;
+    }
+    
+    $('#strategyDescription').html(description);
+}
+
+// 生成投资日期
+function generateInvestmentDates(startDate, endDate, frequency, limit) {
+    const dates = [];
+    let current = new Date(startDate);
+    
+    while (current <= endDate && dates.length < limit) {
+        dates.push(current.toISOString().split('T')[0]);
+        
+        switch(frequency) {
+            case 'daily': 
+                current.setDate(current.getDate() + 1);
+                break;
+            case 'weekly': 
+                current.setDate(current.getDate() + 7);
+                break;
+            case 'biweekly': 
+                current.setDate(current.getDate() + 14);
+                break;
+            case 'monthly': 
+                current.setMonth(current.getMonth() + 1);
+                break;
+        }
+    }
+    
+    return dates;
+}
+
+// 获取条件名称
+function getConditionName(type) {
+    const names = {
+        'price_drop': '价格下跌',
+        'drawdown': '回撤',
+        'rsi': 'RSI',
+        'valuation': '估值'
+    };
+    return names[type] || type;
+}
+
+// 加载投资组合
+async function loadPortfolios() {
+    try {
+        const response = await axios.get('/api/portfolio/list');
+        if (response.data.portfolios && response.data.portfolios.length > 0) {
+            let html = '<select class="form-select" id="portfolioSelect">';
+            response.data.portfolios.forEach(portfolio => {
+                html += `<option value="${portfolio.id}">${portfolio.name}</option>`;
+            });
+            html += '</select>';
+            $('#portfolioSelection').html(html);
+        }
+    } catch (error) {
+        console.error('Failed to load portfolios:', error);
+    }
+}
+
+// 提交表单
+$('#dcaForm').on('submit', async function(e) {
+    e.preventDefault();
+    
+    let dcaConfig = {
+        start_date: $('#dcaStartDate').val(),
+        end_date: $('#dcaEndDate').val(),
+        initial_amount: parseFloat($('#dcaInitialAmount').val()) || 0
+    };
+    
+    // 添加资产配置（这里简化处理，使用默认资产）
+    dcaConfig.assets = [
+        {symbol: 'AAPL', weight: 40},
+        {symbol: 'MSFT', weight: 30},
+        {symbol: 'GOOGL', weight: 30}
+    ];
+    
+    if (selectedDCAType === 'periodic') {
+        dcaConfig.investment_amount = parseFloat($('#periodicAmount').val());
+        dcaConfig.frequency = $('#investmentFrequency').val();
+        dcaConfig.frequency_config = {};
+        
+        if (dcaConfig.frequency === 'monthly') {
+            dcaConfig.frequency_config.day_of_month = parseInt($('#dayOfMonth').val());
+        }
+        
+        try {
+            const response = await axios.post('/api/backtest/dca/periodic', dcaConfig);
+            localStorage.setItem('dcaResult', JSON.stringify(response.data));
+            window.location.href = '/backtest';
+        } catch (error) {
+            alert('定投回测失败: ' + (error.response?.data?.error || error.message));
+        }
+    } else {
+        // 收集条件
+        dcaConfig.conditions = [];
+        $('.condition-item').each(function() {
+            dcaConfig.conditions.push({
+                type: $(this).find('.condition-type').val(),
+                config: {
+                    drop_percentage: parseFloat($(this).find('.condition-threshold').val()),
+                    amount: parseFloat($(this).find('.condition-amount').val()),
+                    cooldown_days: parseInt($(this).find('.condition-cooldown').val())
+                }
+            });
+        });
+        
+        try {
+            const response = await axios.post('/api/backtest/dca/conditional', dcaConfig);
+            localStorage.setItem('dcaResult', JSON.stringify(response.data));
+            window.location.href = '/backtest';
+        } catch (error) {
+            alert('条件定投回测失败: ' + (error.response?.data?.error || error.message));
+        }
+    }
+});
+
+// 保存定投计划
+function saveDCAPlan() {
+    alert('保存功能开发中...');
+}
+
+// 格式化金额
+function formatCurrency(value) {
+    return '$' + value.toLocaleString('en-US', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+    });
+}
+</script>
+{% endblock %}

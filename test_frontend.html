@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>前端功能测试</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>股票回测系统 - 前端功能测试</h1>
+        
+        <div class="card mt-4">
+            <div class="card-body">
+                <h5 class="card-title">测试回测功能</h5>
+                <button id="testBasic" class="btn btn-primary">测试基础回测</button>
+                <button id="testRebalancing" class="btn btn-success">测试再平衡</button>
+                <button id="testDCA" class="btn btn-info">测试定投</button>
+                <button id="testExport" class="btn btn-warning">测试导出</button>
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-body">
+                <h5 class="card-title">测试结果</h5>
+                <div id="results" style="white-space: pre-wrap; font-family: monospace;"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+    function log(message, isError = false) {
+        const timestamp = new Date().toLocaleTimeString();
+        const color = isError ? 'red' : 'green';
+        $('#results').append(`<span style="color: ${color}">[${timestamp}] ${message}</span>\n`);
+    }
+    
+    // 测试基础回测
+    $('#testBasic').click(async function() {
+        log('开始测试基础回测...');
+        try {
+            const response = await fetch('http://localhost:8000/api/backtest/run', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    assets: [
+                        {symbol: 'AAPL', weight: 50},
+                        {symbol: 'MSFT', weight: 50}
+                    ],
+                    start_date: '2023-01-01',
+                    end_date: '2023-06-30',
+                    initial_amount: 10000
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.status === 'completed') {
+                log(`✅ 基础回测成功！总收益: ${data.performance_summary.total_return_pct.toFixed(2)}%`);
+                log(`   年化收益: ${data.performance_summary.annualized_return_pct.toFixed(2)}%`);
+                log(`   最大回撤: ${data.risk_metrics.max_drawdown_pct.toFixed(2)}%`);
+                log(`   夏普比率: ${data.risk_metrics.sharpe_ratio.toFixed(2)}`);
+            } else {
+                log('❌ 基础回测失败: ' + (data.error || 'Unknown error'), true);
+            }
+        } catch (error) {
+            log('❌ 请求失败: ' + error.message, true);
+        }
+    });
+    
+    // 测试再平衡
+    $('#testRebalancing').click(async function() {
+        log('开始测试再平衡策略...');
+        
+        const frequencies = ['yearly', 'quarterly', 'monthly'];
+        
+        for (const freq of frequencies) {
+            try {
+                const response = await fetch('http://localhost:8000/api/backtest/run', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        assets: [{symbol: 'SPY', weight: 100}],
+                        start_date: '2023-01-01',
+                        end_date: '2023-12-31',
+                        initial_amount: 10000,
+                        rebalance_frequency: freq
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === 'completed') {
+                    log(`✅ ${freq}再平衡成功！收益: ${data.performance_summary.total_return_pct.toFixed(2)}%`);
+                } else {
+                    log(`❌ ${freq}再平衡失败`, true);
+                }
+            } catch (error) {
+                log(`❌ ${freq}再平衡请求失败`, true);
+            }
+        }
+    });
+    
+    // 测试定投
+    $('#testDCA').click(async function() {
+        log('开始测试定投功能...');
+        
+        // 测试定期定投
+        try {
+            const response = await fetch('http://localhost:8000/api/backtest/dca/periodic', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    assets: [{symbol: 'AAPL', weight: 100}],
+                    start_date: '2023-01-01',
+                    end_date: '2023-12-31',
+                    initial_amount: 1000,
+                    investment_amount: 500,
+                    frequency: 'monthly',
+                    frequency_config: {day_of_month: 15}
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.status === 'completed') {
+                log(`✅ 定期定投成功！`);
+                log(`   总投入: $${data.performance.total_invested}`);
+                log(`   最终价值: $${data.performance.final_value.toFixed(2)}`);
+                log(`   收益率: ${data.performance.total_return_pct.toFixed(2)}%`);
+            } else {
+                log('❌ 定期定投失败', true);
+            }
+        } catch (error) {
+            log('❌ 定期定投请求失败: ' + error.message, true);
+        }
+        
+        // 测试条件定投
+        try {
+            const response = await fetch('http://localhost:8000/api/backtest/dca/conditional', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    assets: [{symbol: 'AAPL', weight: 100}],
+                    start_date: '2023-01-01',
+                    end_date: '2023-06-30',
+                    initial_amount: 5000,
+                    conditions: [{
+                        type: 'price_drop',
+                        config: {
+                            drop_percentage: 3.0,
+                            amount: 1000,
+                            cooldown_days: 7
+                        }
+                    }]
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.status === 'completed') {
+                log(`✅ 条件定投成功！触发次数: ${data.config_summary.total_triggers}`);
+            } else {
+                log('❌ 条件定投失败', true);
+            }
+        } catch (error) {
+            log('❌ 条件定投请求失败: ' + error.message, true);
+        }
+    });
+    
+    // 测试导出
+    $('#testExport').click(async function() {
+        log('开始测试导出功能...');
+        
+        // 先运行一个回测
+        try {
+            const backtestResponse = await fetch('http://localhost:8000/api/backtest/run', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    assets: [{symbol: 'AAPL', weight: 100}],
+                    start_date: '2023-01-01',
+                    end_date: '2023-03-31',
+                    initial_amount: 10000
+                })
+            });
+            
+            const backtestData = await backtestResponse.json();
+            
+            if (backtestData.status === 'completed') {
+                log('✅ 回测完成，开始测试导出...');
+                
+                // 测试各种导出格式
+                const formats = ['csv', 'json', 'html'];
+                
+                for (const format of formats) {
+                    try {
+                        const exportResponse = await fetch(`http://localhost:8000/api/backtest/export/${format}`, {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify(backtestData)
+                        });
+                        
+                        if (exportResponse.ok) {
+                            log(`✅ ${format.toUpperCase()}导出成功`);
+                        } else {
+                            log(`❌ ${format.toUpperCase()}导出失败`, true);
+                        }
+                    } catch (error) {
+                        log(`❌ ${format.toUpperCase()}导出请求失败`, true);
+                    }
+                }
+            } else {
+                log('❌ 回测失败，无法测试导出', true);
+            }
+        } catch (error) {
+            log('❌ 导出测试失败: ' + error.message, true);
+        }
+    });
+    
+    // 页面加载时的初始检查
+    $(document).ready(async function() {
+        log('正在检查服务状态...');
+        try {
+            const response = await fetch('http://localhost:8000/api/health');
+            const data = await response.json();
+            if (data.status === 'healthy') {
+                log('✅ 服务运行正常，版本: ' + data.version);
+            } else {
+                log('⚠️ 服务状态异常', true);
+            }
+        } catch (error) {
+            log('❌ 无法连接到服务', true);
+        }
+    });
+    </script>
+</body>
+</html>

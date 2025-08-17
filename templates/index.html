@@ -1,0 +1,522 @@
+{% extends "base.html" %}
+
+{% block title %}股票回测分析系统 - 首页{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h2>投资组合回测分析</h2>
+        <p class="text-muted">配置您的投资组合，进行历史回测分析</p>
+    </div>
+</div>
+
+<div class="row">
+    <!-- 投资组合配置 -->
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>投资组合配置</h5>
+            </div>
+            <div class="card-body">
+                <form id="backtestForm">
+                    <div class="mb-3">
+                        <label class="form-label">时间范围</label>
+                        <input type="date" class="form-control mb-2" id="startDate" value="2022-01-01" required>
+                        <input type="date" class="form-control" id="endDate" value="2023-12-31" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">初始金额 ($)</label>
+                        <input type="number" class="form-control" id="initialAmount" value="10000" min="1000" max="1000000" required>
+                    </div>
+                    
+                    <!-- 再平衡策略 -->
+                    <div class="mb-3">
+                        <label class="form-label">再平衡策略</label>
+                        <select class="form-select" id="rebalanceFrequency">
+                            <option value="">不再平衡</option>
+                            <option value="yearly">年度再平衡</option>
+                            <option value="quarterly">季度再平衡</option>
+                            <option value="monthly">月度再平衡</option>
+                        </select>
+                    </div>
+                    
+                    <!-- 定投策略 -->
+                    <div class="mb-3">
+                        <label class="form-label">定投策略</label>
+                        <select class="form-select" id="dcaType">
+                            <option value="none">不定投</option>
+                            <option value="periodic">定期定投</option>
+                            <option value="conditional">条件定投</option>
+                        </select>
+                    </div>
+                    
+                    <!-- 定期定投配置 -->
+                    <div id="periodicDcaConfig" style="display: none;" class="card mb-3">
+                        <div class="card-body">
+                            <h6 class="card-title">定期定投设置</h6>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <label class="form-label">频率</label>
+                                    <select class="form-select form-select-sm" id="dcaFrequency">
+                                        <option value="monthly">每月</option>
+                                        <option value="weekly">每周</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">金额 ($)</label>
+                                    <input type="number" class="form-control form-control-sm" id="dcaAmount" value="500" min="10">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">日期</label>
+                                    <input type="number" class="form-control form-control-sm" id="dcaDay" value="1" min="1" max="31">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 条件定投配置 -->
+                    <div id="conditionalDcaConfig" style="display: none;" class="card mb-3">
+                        <div class="card-body">
+                            <h6 class="card-title">条件定投设置</h6>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <label class="form-label">触发条件</label>
+                                    <select class="form-select form-select-sm" id="conditionType">
+                                        <option value="price_drop">价格下跌</option>
+                                        <option value="drawdown">回撤触发</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">阈值 (%)</label>
+                                    <input type="number" class="form-control form-control-sm" id="conditionThreshold" value="3" min="1">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">金额 ($)</label>
+                                    <input type="number" class="form-control form-control-sm" id="conditionAmount" value="1000" min="10">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">资产配置</label>
+                        <div id="assetsContainer">
+                            <div class="asset-row mb-2">
+                                <div class="input-group">
+                                    <input type="text" class="form-control asset-symbol" placeholder="股票代码" value="AAPL">
+                                    <input type="number" class="form-control asset-weight" placeholder="权重%" value="40" min="0" max="100">
+                                    <button type="button" class="btn btn-danger btn-sm remove-asset">删除</button>
+                                </div>
+                            </div>
+                            <div class="asset-row mb-2">
+                                <div class="input-group">
+                                    <input type="text" class="form-control asset-symbol" placeholder="股票代码" value="MSFT">
+                                    <input type="number" class="form-control asset-weight" placeholder="权重%" value="30" min="0" max="100">
+                                    <button type="button" class="btn btn-danger btn-sm remove-asset">删除</button>
+                                </div>
+                            </div>
+                            <div class="asset-row mb-2">
+                                <div class="input-group">
+                                    <input type="text" class="form-control asset-symbol" placeholder="股票代码" value="GOOGL">
+                                    <input type="number" class="form-control asset-weight" placeholder="权重%" value="30" min="0" max="100">
+                                    <button type="button" class="btn btn-danger btn-sm remove-asset">删除</button>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-secondary btn-sm" id="addAsset">+ 添加资产</button>
+                        <div class="mt-2">
+                            <small class="text-muted">总权重: <span id="totalWeight">100</span>%</small>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100">运行回测</button>
+                </form>
+                
+                <div class="loading mt-3 text-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p>正在执行回测计算...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 回测结果 -->
+    <div class="col-md-8">
+        <div id="resultsContainer" style="display: none;">
+            <!-- 核心指标 -->
+            <div class="row mb-3">
+                <div class="col-md-3">
+                    <div class="card metric-card">
+                        <div class="metric-label">总收益率</div>
+                        <div class="metric-value" id="totalReturn">-</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card metric-card">
+                        <div class="metric-label">年化收益率</div>
+                        <div class="metric-value" id="annualizedReturn">-</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card metric-card">
+                        <div class="metric-label">最大回撤</div>
+                        <div class="metric-value" id="maxDrawdown">-</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card metric-card">
+                        <div class="metric-label">夏普比率</div>
+                        <div class="metric-value" id="sharpeRatio">-</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 投资组合增长图 -->
+            <div class="card">
+                <div class="card-header">
+                    <h5>投资组合增长曲线</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="portfolioChart" height="100"></canvas>
+                </div>
+            </div>
+            
+            <!-- 年度收益表 -->
+            <div class="card">
+                <div class="card-header">
+                    <h5>年度收益表现</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="annualReturnsChart" height="80"></canvas>
+                </div>
+            </div>
+            
+            <!-- 详细指标表 -->
+            <div class="card">
+                <div class="card-header">
+                    <h5>详细指标</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <tbody>
+                            <tr>
+                                <td>起始金额</td>
+                                <td id="startValue">-</td>
+                                <td>结束金额</td>
+                                <td id="endValue">-</td>
+                            </tr>
+                            <tr>
+                                <td>年化波动率</td>
+                                <td id="volatility">-</td>
+                                <td>索提诺比率</td>
+                                <td id="sortinoRatio">-</td>
+                            </tr>
+                            <tr>
+                                <td>正收益天数</td>
+                                <td id="positiveRate">-</td>
+                                <td>回测天数</td>
+                                <td id="totalDays">-</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 初始提示 -->
+        <div id="initialMessage" class="card">
+            <div class="card-body text-center py-5">
+                <h4>欢迎使用股票回测分析系统</h4>
+                <p class="text-muted">请在左侧配置您的投资组合，然后点击"运行回测"开始分析</p>
+                <p class="text-muted">支持美股主要股票，如 AAPL, MSFT, GOOGL, AMZN, TSLA 等</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let portfolioChart = null;
+let annualReturnsChart = null;
+
+// 更新权重总和
+function updateTotalWeight() {
+    let total = 0;
+    $('.asset-weight').each(function() {
+        total += parseFloat($(this).val()) || 0;
+    });
+    $('#totalWeight').text(total.toFixed(1));
+    
+    if (Math.abs(total - 100) > 0.01) {
+        $('#totalWeight').addClass('text-danger').removeClass('text-success');
+    } else {
+        $('#totalWeight').addClass('text-success').removeClass('text-danger');
+    }
+}
+
+// 添加资产行
+$('#addAsset').click(function() {
+    const assetRow = `
+        <div class="asset-row mb-2">
+            <div class="input-group">
+                <input type="text" class="form-control asset-symbol" placeholder="股票代码">
+                <input type="number" class="form-control asset-weight" placeholder="权重%" min="0" max="100">
+                <button type="button" class="btn btn-danger btn-sm remove-asset">删除</button>
+            </div>
+        </div>
+    `;
+    $('#assetsContainer').append(assetRow);
+});
+
+// 删除资产行
+$(document).on('click', '.remove-asset', function() {
+    $(this).closest('.asset-row').remove();
+    updateTotalWeight();
+});
+
+// 权重变化时更新总和
+$(document).on('input', '.asset-weight', function() {
+    updateTotalWeight();
+});
+
+// 提交表单
+$('#backtestForm').submit(async function(e) {
+    e.preventDefault();
+    
+    // 收集资产数据
+    const assets = [];
+    $('.asset-row').each(function() {
+        const symbol = $(this).find('.asset-symbol').val();
+        const weight = parseFloat($(this).find('.asset-weight').val());
+        if (symbol && weight) {
+            assets.push({ symbol, weight });
+        }
+    });
+    
+    if (assets.length === 0) {
+        alert('请至少添加一个资产');
+        return;
+    }
+    
+    // 验证权重总和
+    const totalWeight = assets.reduce((sum, a) => sum + a.weight, 0);
+    if (Math.abs(totalWeight - 100) > 0.01) {
+        alert('权重总和必须等于100%');
+        return;
+    }
+    
+    // 准备表单数据
+    const formData = new FormData();
+    formData.append('assets', JSON.stringify(assets));
+    formData.append('start_date', $('#startDate').val());
+    formData.append('end_date', $('#endDate').val());
+    formData.append('initial_amount', $('#initialAmount').val());
+    
+    // 显示加载状态
+    $('.loading').addClass('show');
+    $('#resultsContainer').hide();
+    $('#initialMessage').hide();
+    
+    try {
+        // 发送请求
+        const response = await fetch('/api/backtest/run', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const result = await response.json();
+        
+        if (result.status === 'failed') {
+            throw new Error(result.error || '回测失败');
+        }
+        
+        // 显示结果
+        displayResults(result);
+        
+    } catch (error) {
+        alert('回测失败: ' + error.message);
+    } finally {
+        $('.loading').removeClass('show');
+    }
+});
+
+// 显示回测结果
+function displayResults(data) {
+    // 检查数据结构
+    if (!data || !data.performance_summary || !data.risk_metrics) {
+        alert('回测结果数据格式错误');
+        console.error('Invalid data structure:', data);
+        return;
+    }
+    
+    // 获取数据，提供默认值
+    const perf = data.performance_summary || {};
+    const risk = data.risk_metrics || {};
+    
+    // 显示核心指标
+    $('#totalReturn').text(formatPercent(perf.total_return_pct || 0));
+    $('#annualizedReturn').text(formatPercent(perf.annualized_return_pct || 0));
+    $('#maxDrawdown').text(formatPercent(risk.max_drawdown_pct || 0));
+    $('#sharpeRatio').text((risk.sharpe_ratio || 0).toFixed(2));
+    
+    // 设置颜色
+    setValueColor('#totalReturn', perf.total_return_pct || 0);
+    setValueColor('#annualizedReturn', perf.annualized_return_pct || 0);
+    setValueColor('#maxDrawdown', risk.max_drawdown_pct || 0);
+    
+    // 显示详细指标
+    $('#startValue').text('$' + formatNumber(perf.start_value || 0));
+    $('#endValue').text('$' + formatNumber(perf.end_value || 0));
+    $('#volatility').text(formatPercent(risk.volatility_annual_pct || 0));
+    $('#sortinoRatio').text((risk.sortino_ratio || 0).toFixed(2));
+    $('#positiveRate').text(formatPercent(risk.positive_rate_pct || 0));
+    
+    // 绘制图表
+    if (data.time_series && data.time_series.length > 0) {
+        drawPortfolioChart(data.time_series);
+    }
+    if (data.annual_returns && data.annual_returns.length > 0) {
+        drawAnnualReturnsChart(data.annual_returns);
+    }
+    
+    // 显示结果容器
+    $('#resultsContainer').show();
+}
+
+// 绘制投资组合增长图
+function drawPortfolioChart(timeSeries) {
+    if (!timeSeries || timeSeries.length === 0) return;
+    
+    const ctx = document.getElementById('portfolioChart').getContext('2d');
+    
+    if (portfolioChart) {
+        portfolioChart.destroy();
+    }
+    
+    portfolioChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: timeSeries.map(d => d.date),
+            datasets: [{
+                label: '投资组合价值',
+                data: timeSeries.map(d => d.value),
+                borderColor: '#3B82F6',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                borderWidth: 2,
+                pointRadius: 0,
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return '$' + formatNumber(context.parsed.y);
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    display: false
+                },
+                y: {
+                    ticks: {
+                        callback: function(value) {
+                            return '$' + (value / 1000).toFixed(0) + 'K';
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// 绘制年度收益图
+function drawAnnualReturnsChart(annualReturns) {
+    if (!annualReturns || annualReturns.length === 0) return;
+    
+    const ctx = document.getElementById('annualReturnsChart').getContext('2d');
+    
+    if (annualReturnsChart) {
+        annualReturnsChart.destroy();
+    }
+    
+    const colors = annualReturns.map(r => r.annual_return >= 0 ? '#10B981' : '#EF4444');
+    
+    annualReturnsChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: annualReturns.map(r => r.year),
+            datasets: [{
+                label: '年度收益率',
+                data: annualReturns.map(r => r.annual_return),
+                backgroundColor: colors,
+                borderColor: colors,
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return formatPercent(context.parsed.y);
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    ticks: {
+                        callback: function(value) {
+                            return value + '%';
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// 格式化函数
+function formatPercent(value) {
+    if (typeof value !== 'number') return '-';
+    return (value >= 0 ? '+' : '') + value.toFixed(2) + '%';
+}
+
+function formatNumber(value) {
+    if (typeof value !== 'number') return '-';
+    return value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function setValueColor(selector, value) {
+    if (value >= 0) {
+        $(selector).addClass('positive').removeClass('negative');
+    } else {
+        $(selector).addClass('negative').removeClass('positive');
+    }
+}
+
+// 初始化
+$(document).ready(function() {
+    updateTotalWeight();
+});
+</script>
+{% endblock %}

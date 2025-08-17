@@ -1,0 +1,4038 @@
+[
+  {
+    "name": "健康检查",
+    "method": "GET",
+    "path": "/api/health",
+    "status_code": 200,
+    "success": true,
+    "response": {
+      "status": "healthy",
+      "version": "1.0.0"
+    }
+  },
+  {
+    "name": "股票搜索",
+    "method": "GET",
+    "path": "/api/stocks/search",
+    "status_code": 200,
+    "success": true,
+    "response": {
+      "count": 1,
+      "query": "AAPL",
+      "results": [
+        {
+          "name": "Apple Inc.",
+          "symbol": "AAPL"
+        }
+      ]
+    }
+  },
+  {
+    "name": "股票信息",
+    "method": "GET",
+    "path": "/api/stocks/info/AAPL",
+    "status_code": 200,
+    "success": true,
+    "response": {
+      "currency": "USD",
+      "current_price": 231.59,
+      "dividend_yield": 0.45,
+      "exchange": "NMS",
+      "industry": "Consumer Electronics",
+      "market_cap": 3436888195072,
+      "name": "Apple Inc.",
+      "pe_ratio": 35.089394,
+      "sector": "Technology",
+      "symbol": "AAPL"
+    }
+  },
+  {
+    "name": "股票验证",
+    "method": "POST",
+    "path": "/api/stocks/validate",
+    "status_code": 200,
+    "success": true,
+    "response": {
+      "invalid_count": 1,
+      "results": {
+        "AAPL": true,
+        "INVALID": false,
+        "MSFT": true
+      },
+      "valid_count": 2
+    }
+  },
+  {
+    "name": "批量股票信息",
+    "method": "POST",
+    "path": "/api/stocks/batch-info",
+    "status_code": 200,
+    "success": true,
+    "response": {
+      "AAPL": {
+        "currency": "USD",
+        "current_price": 231.59,
+        "dividend_yield": 0.45,
+        "exchange": "NMS",
+        "industry": "Consumer Electronics",
+        "market_cap": 3436888195072,
+        "name": "Apple Inc.",
+        "pe_ratio": 35.089394,
+        "sector": "Technology",
+        "symbol": "AAPL"
+      },
+      "GOOGL": {
+        "currency": "USD",
+        "current_price": 203.9,
+        "dividend_yield": 0.41,
+        "exchange": "NMS",
+        "industry": "Internet Content & Information",
+        "market_cap": 2471451426816,
+        "name": "Alphabet Inc.",
+        "pe_ratio": 21.73774,
+        "sector": "Communication Services",
+        "symbol": "GOOGL"
+      },
+      "MSFT": {
+        "currency": "USD",
+        "current_price": 520.17,
+        "dividend_yield": 0.64,
+        "exchange": "NMS",
+        "industry": "Software - Infrastructure",
+        "market_cap": 3866511802368,
+        "name": "Microsoft Corporation",
+        "pe_ratio": 38.16361,
+        "sector": "Technology",
+        "symbol": "MSFT"
+      }
+    }
+  },
+  {
+    "name": "创建投资组合",
+    "method": "POST",
+    "path": "/api/portfolio/create",
+    "status_code": 201,
+    "success": true,
+    "response": {
+      "message": "Portfolio created successfully",
+      "portfolio_id": "port_2"
+    }
+  },
+  {
+    "name": "获取投资组合",
+    "method": "GET",
+    "path": "/api/portfolio/port_2",
+    "status_code": 200,
+    "success": true,
+    "response": {
+      "assets": [
+        {
+          "symbol": "AAPL",
+          "weight": 40
+        },
+        {
+          "symbol": "MSFT",
+          "weight": 30
+        },
+        {
+          "symbol": "GOOGL",
+          "weight": 30
+        }
+      ],
+      "name": "测试组合",
+      "portfolio_id": "port_2"
+    }
+  },
+  {
+    "name": "更新投资组合",
+    "method": "PUT",
+    "path": "/api/portfolio/port_2",
+    "status_code": 200,
+    "success": true,
+    "response": {
+      "message": "Portfolio updated successfully",
+      "portfolio_id": "port_2"
+    }
+  },
+  {
+    "name": "列出投资组合",
+    "method": "GET",
+    "path": "/api/portfolio/list",
+    "status_code": 200,
+    "success": true,
+    "response": {
+      "limit": 10,
+      "offset": 0,
+      "portfolios": [
+        {
+          "assets": [
+            {
+              "symbol": "AAPL",
+              "weight": 30
+            },
+            {
+              "symbol": "MSFT",
+              "weight": 30
+            },
+            {
+              "symbol": "GOOGL",
+              "weight": 20
+            },
+            {
+              "symbol": "AMZN",
+              "weight": 20
+            }
+          ],
+          "name": "综合测试组合",
+          "portfolio_id": "port_1"
+        },
+        {
+          "assets": [
+            {
+              "symbol": "AAPL",
+              "weight": 50
+            },
+            {
+              "symbol": "MSFT",
+              "weight": 50
+            }
+          ],
+          "name": "更新的测试组合",
+          "portfolio_id": "port_2"
+        }
+      ],
+      "total": 2
+    }
+  },
+  {
+    "name": "基础回测(无基准)",
+    "method": "POST",
+    "path": "/api/backtest/run",
+    "status_code": 200,
+    "success": true,
+    "response": {
+      "annual_returns": [
+        {
+          "annual_return": 46.267112215494485,
+          "end_value": 14626.711221549449,
+          "start_value": 10000.0,
+          "volatility": 21.613043137100654,
+          "year": 2023
+        }
+      ],
+      "backtest_id": "bt_41ff0d0c7213",
+      "benchmark_comparison": null,
+      "config_summary": {
+        "asset_count": 2,
+        "benchmark": null,
+        "end_date": "2023-06-30",
+        "initial_amount": 10000,
+        "start_date": "2023-01-01"
+      },
+      "created_at": "2025-08-17T04:02:46.884570",
+      "performance_summary": {
+        "annualized_return_pct": 117.94620445739734,
+        "end_value": 14626.711221549449,
+        "start_value": 10000,
+        "total_return_pct": 46.267112215494485
+      },
+      "portfolio_composition": [
+        {
+          "symbol": "AAPL",
+          "weight": 50
+        },
+        {
+          "symbol": "MSFT",
+          "weight": 50
+        }
+      ],
+      "risk_metrics": {
+        "max_drawdown_pct": -7.452720000771169,
+        "positive_rate_pct": 54.91803278688525,
+        "sharpe_ratio": 3.7183053496743472,
+        "sortino_ratio": 7.110622009773834,
+        "volatility_annual_pct": 2178.6032820927094
+      },
+      "status": "completed",
+      "time_series": [
+        {
+          "cumulative_return": 0.0,
+          "daily_return": 0.0,
+          "date": "2023-01-03",
+          "value": 10000.0
+        },
+        {
+          "cumulative_return": -1.6714420965640784,
+          "daily_return": -1.6714420965640784,
+          "date": "2023-01-04",
+          "value": 9832.855790343592
+        },
+        {
+          "cumulative_return": -3.624205880236623,
+          "daily_return": -1.9859579203737192,
+          "date": "2023-01-05",
+          "value": 9637.579411976338
+        },
+        {
+          "cumulative_return": -1.238455461285157,
+          "daily_return": 2.4754664184522968,
+          "date": "2023-01-06",
+          "value": 9876.154453871484
+        },
+        {
+          "cumulative_return": -0.5695299128960506,
+          "daily_return": 0.6773137778610637,
+          "date": "2023-01-09",
+          "value": 9943.047008710395
+        },
+        {
+          "cumulative_return": 0.023398323911933402,
+          "daily_return": 0.5963244831172595,
+          "date": "2023-01-10",
+          "value": 10002.339832391193
+        },
+        {
+          "cumulative_return": 2.570972600684472,
+          "daily_return": 2.5469783265337296,
+          "date": "2023-01-11",
+          "value": 10257.097260068447
+        },
+        {
+          "cumulative_return": 3.110828644894864,
+          "daily_return": 0.5263243883940603,
+          "date": "2023-01-12",
+          "value": 10311.082864489486
+        },
+        {
+          "cumulative_return": 3.8007874082566193,
+          "daily_return": 0.669142875127031,
+          "date": "2023-01-13",
+          "value": 10380.078740825662
+        },
+        {
+          "cumulative_return": 4.506269770936396,
+          "daily_return": 0.6796502996697507,
+          "date": "2023-01-17",
+          "value": 10450.62697709364
+        },
+        {
+          "cumulative_return": 3.2669297209810972,
+          "daily_return": -1.1859001882583358,
+          "date": "2023-01-18",
+          "value": 10326.69297209811
+        },
+        {
+          "cumulative_return": 2.4811720898453493,
+          "daily_return": -0.7608995767171558,
+          "date": "2023-01-19",
+          "value": 10248.117208984535
+        },
+        {
+          "cumulative_return": 5.250698006617404,
+          "daily_return": 2.702472913116185,
+          "date": "2023-01-20",
+          "value": 10525.06980066174
+        },
+        {
+          "cumulative_return": 7.03849421201172,
+          "daily_return": 1.6986074574839514,
+          "date": "2023-01-23",
+          "value": 10703.849421201172
+        },
+        {
+          "cumulative_return": 7.493488088860086,
+          "daily_return": 0.4250749977360083,
+          "date": "2023-01-24",
+          "value": 10749.348808886009
+        },
+        {
+          "cumulative_return": 6.9271997477671166,
+          "daily_return": -0.526811764285519,
+          "date": "2023-01-25",
+          "value": 10692.719974776712
+        },
+        {
+          "cumulative_return": 9.309006847915116,
+          "daily_return": 2.2275034843954526,
+          "date": "2023-01-26",
+          "value": 10930.900684791512
+        },
+        {
+          "cumulative_return": 10.129973680564525,
+          "daily_return": 0.7510514058476864,
+          "date": "2023-01-27",
+          "value": 11012.997368056453
+        },
+        {
+          "cumulative_return": 7.821217554415798,
+          "daily_return": -2.096392152826031,
+          "date": "2023-01-30",
+          "value": 10782.12175544158
+        },
+        {
+          "cumulative_return": 9.40128207030153,
+          "daily_return": 1.465448593258834,
+          "date": "2023-01-31",
+          "value": 10940.128207030153
+        },
+        {
+          "cumulative_return": 10.88800484282694,
+          "daily_return": 1.3589628424738542,
+          "date": "2023-02-01",
+          "value": 11088.800484282694
+        },
+        {
+          "cumulative_return": 15.515878455526892,
+          "daily_return": 4.173466390038773,
+          "date": "2023-02-02",
+          "value": 11551.587845552689
+        },
+        {
+          "cumulative_return": 15.682670628859524,
+          "daily_return": 0.14438895809189314,
+          "date": "2023-02-03",
+          "value": 11568.267062885952
+        },
+        {
+          "cumulative_return": 14.245556495334222,
+          "daily_return": -1.2422899002184538,
+          "date": "2023-02-06",
+          "value": 11424.555649533422
+        },
+        {
+          "cumulative_return": 17.664763329407034,
+          "daily_return": 2.9928576121141757,
+          "date": "2023-02-07",
+          "value": 11766.476332940703
+        },
+        {
+          "cumulative_return": 16.400172805638377,
+          "daily_return": -1.0747402093763507,
+          "date": "2023-02-08",
+          "value": 11640.017280563838
+        },
+        {
+          "cumulative_return": 15.331335690676658,
+          "daily_return": -0.9182435809149778,
+          "date": "2023-02-09",
+          "value": 11533.133569067666
+        },
+        {
+          "cumulative_return": 15.370958444662428,
+          "daily_return": 0.03435558406436742,
+          "date": "2023-02-10",
+          "value": 11537.095844466243
+        },
+        {
+          "cumulative_return": 18.223564123131837,
+          "daily_return": 2.472550906160373,
+          "date": "2023-02-13",
+          "value": 11822.356412313184
+        },
+        {
+          "cumulative_return": 18.14070062221295,
+          "daily_return": -0.07009051159427072,
+          "date": "2023-02-14",
+          "value": 11814.070062221295
+        },
+        {
+          "cumulative_return": 18.539516869426297,
+          "daily_return": 0.3375773506614524,
+          "date": "2023-02-15",
+          "value": 11853.95168694263
+        },
+        {
+          "cumulative_return": 16.390781473779025,
+          "daily_return": -1.8126743320661147,
+          "date": "2023-02-16",
+          "value": 11639.078147377902
+        },
+        {
+          "cumulative_return": 15.070610058948095,
+          "daily_return": -1.1342577119205464,
+          "date": "2023-02-17",
+          "value": 11507.06100589481
+        },
+        {
+          "cumulative_return": 12.313331058599687,
+          "daily_return": -2.396162668239888,
+          "date": "2023-02-21",
+          "value": 11231.333105859969
+        },
+        {
+          "cumulative_return": 12.242811224900105,
+          "daily_return": -0.06278848025866844,
+          "date": "2023-02-22",
+          "value": 11224.28112249001
+        },
+        {
+          "cumulative_return": 13.121071554644132,
+          "daily_return": 0.7824646586802443,
+          "date": "2023-02-23",
+          "value": 11312.107155464413
+        },
+        {
+          "cumulative_return": 10.882848966694146,
+          "daily_return": -1.9786080145720617,
+          "date": "2023-02-24",
+          "value": 11088.284896669415
+        },
+        {
+          "cumulative_return": 11.563964358670765,
+          "daily_return": 0.614265775387143,
+          "date": "2023-02-27",
+          "value": 11156.396435867076
+        },
+        {
+          "cumulative_return": 11.204964160466952,
+          "daily_return": -0.32178867098129477,
+          "date": "2023-02-28",
+          "value": 11120.496416046695
+        },
+        {
+          "cumulative_return": 9.705098586881048,
+          "daily_return": -1.3487397661687308,
+          "date": "2023-03-01",
+          "value": 10970.509858688105
+        },
+        {
+          "cumulative_return": 10.957961054556927,
+          "daily_return": 1.1420275664614363,
+          "date": "2023-03-02",
+          "value": 11095.796105455693
+        },
+        {
+          "cumulative_return": 13.882473075522611,
+          "daily_return": 2.635693728661553,
+          "date": "2023-03-03",
+          "value": 11388.247307552261
+        },
+        {
+          "cumulative_return": 15.334130405287905,
+          "daily_return": 1.2746977568730957,
+          "date": "2023-03-06",
+          "value": 11533.41304052879
+        },
+        {
+          "cumulative_return": 13.872190733570825,
+          "daily_return": -1.2675689898382885,
+          "date": "2023-03-07",
+          "value": 11387.219073357082
+        },
+        {
+          "cumulative_return": 14.28654209928929,
+          "daily_return": 0.36387406183124493,
+          "date": "2023-03-08",
+          "value": 11428.654209928929
+        },
+        {
+          "cumulative_return": 13.084922415185865,
+          "daily_return": -1.0514096078429673,
+          "date": "2023-03-09",
+          "value": 11308.492241518587
+        },
+        {
+          "cumulative_return": 11.467717559181837,
+          "daily_return": -1.4300799978148613,
+          "date": "2023-03-10",
+          "value": 11146.771755918184
+        },
+        {
+          "cumulative_return": 13.371626017279558,
+          "daily_return": 1.7080357432517397,
+          "date": "2023-03-13",
+          "value": 11337.162601727956
+        },
+        {
+          "cumulative_return": 15.657798208437743,
+          "daily_return": 2.0165294187539806,
+          "date": "2023-03-14",
+          "value": 11565.779820843774
+        },
+        {
+          "cumulative_return": 16.79083059355411,
+          "daily_return": 0.9796420152097508,
+          "date": "2023-03-15",
+          "value": 11679.083059355411
+        },
+        {
+          "cumulative_return": 20.187167943727342,
+          "daily_return": 2.908051370910179,
+          "date": "2023-03-16",
+          "value": 12018.716794372735
+        },
+        {
+          "cumulative_return": 20.52261145470482,
+          "daily_return": 0.2791009362451509,
+          "date": "2023-03-17",
+          "value": 12052.261145470482
+        },
+        {
+          "cumulative_return": 19.977162458135535,
+          "daily_return": -0.4525698455963817,
+          "date": "2023-03-20",
+          "value": 11997.716245813554
+        },
+        {
+          "cumulative_return": 21.05416087777412,
+          "daily_return": 0.8976695210760542,
+          "date": "2023-03-21",
+          "value": 12105.416087777412
+        },
+        {
+          "cumulative_return": 20.161877047820745,
+          "daily_return": -0.7370947214728922,
+          "date": "2023-03-22",
+          "value": 12016.187704782074
+        },
+        {
+          "cumulative_return": 21.72582414148177,
+          "daily_return": 1.3015335080348518,
+          "date": "2023-03-23",
+          "value": 12172.582414148177
+        },
+        {
+          "cumulative_return": 22.86315688252387,
+          "daily_return": 0.9343397336297188,
+          "date": "2023-03-24",
+          "value": 12286.315688252387
+        },
+        {
+          "cumulative_return": 21.197768378365602,
+          "daily_return": -1.3554824297333015,
+          "date": "2023-03-27",
+          "value": 12119.77683783656
+        },
+        {
+          "cumulative_return": 20.704913832286728,
+          "daily_return": -0.4066531526721139,
+          "date": "2023-03-28",
+          "value": 12070.491383228673
+        },
+        {
+          "cumulative_return": 23.058821296046354,
+          "daily_return": 1.9501339166939444,
+          "date": "2023-03-29",
+          "value": 12305.882129604635
+        },
+        {
+          "cumulative_return": 24.436057221365846,
+          "daily_return": 1.1191687932766992,
+          "date": "2023-03-30",
+          "value": 12443.605722136585
+        },
+        {
+          "cumulative_return": 26.3422447147534,
+          "daily_return": 1.5318610505285732,
+          "date": "2023-03-31",
+          "value": 12634.22447147534
+        },
+        {
+          "cumulative_return": 26.626869767426943,
+          "daily_return": 0.2252809844531036,
+          "date": "2023-04-03",
+          "value": 12662.686976742694
+        },
+        {
+          "cumulative_return": 26.40018259810169,
+          "daily_return": -0.1790198002537711,
+          "date": "2023-04-04",
+          "value": 12640.01825981017
+        },
+        {
+          "cumulative_return": 25.057276829391228,
+          "daily_return": -1.062423915146013,
+          "date": "2023-04-05",
+          "value": 12505.727682939123
+        },
+        {
+          "cumulative_return": 26.936577029289566,
+          "daily_return": 1.5027515771530517,
+          "date": "2023-04-06",
+          "value": 12693.657702928956
+        },
+        {
+          "cumulative_return": 25.421169217447257,
+          "daily_return": -1.193830688764073,
+          "date": "2023-04-10",
+          "value": 12542.116921744726
+        },
+        {
+          "cumulative_return": 23.556200037449816,
+          "daily_return": -1.486965232132446,
+          "date": "2023-04-11",
+          "value": 12355.620003744982
+        },
+        {
+          "cumulative_return": 23.414015362949904,
+          "daily_return": -0.11507692406922262,
+          "date": "2023-04-12",
+          "value": 12341.40153629499
+        },
+        {
+          "cumulative_return": 26.928688196712592,
+          "daily_return": 2.847871713294751,
+          "date": "2023-04-13",
+          "value": 12692.86881967126
+        },
+        {
+          "cumulative_return": 26.014446091832433,
+          "daily_return": -0.7202801178117253,
+          "date": "2023-04-14",
+          "value": 12601.444609183243
+        },
+        {
+          "cumulative_return": 26.578966720064106,
+          "daily_return": 0.4479808829380435,
+          "date": "2023-04-17",
+          "value": 12657.89667200641
+        },
+        {
+          "cumulative_return": 26.98549576531532,
+          "daily_return": 0.3211663483952029,
+          "date": "2023-04-18",
+          "value": 12698.549576531532
+        },
+        {
+          "cumulative_return": 27.466690624380423,
+          "daily_return": 0.3789368668957398,
+          "date": "2023-04-19",
+          "value": 12746.669062438043
+        },
+        {
+          "cumulative_return": 26.58470986660403,
+          "daily_return": -0.6919303807576102,
+          "date": "2023-04-20",
+          "value": 12658.470986660403
+        },
+        {
+          "cumulative_return": 25.858867817971987,
+          "daily_return": -0.5734042045022162,
+          "date": "2023-04-21",
+          "value": 12585.886781797199
+        },
+        {
+          "cumulative_return": 25.148184067962394,
+          "daily_return": -0.5646672040920041,
+          "date": "2023-04-24",
+          "value": 12514.81840679624
+        },
+        {
+          "cumulative_return": 23.195021520091068,
+          "daily_return": -1.5606798951318779,
+          "date": "2023-04-25",
+          "value": 12319.502152009107
+        },
+        {
+          "cumulative_return": 27.364996130373022,
+          "daily_return": 3.3848564323696295,
+          "date": "2023-04-26",
+          "value": 12736.499613037302
+        },
+        {
+          "cumulative_return": 31.206024484188855,
+          "daily_return": 3.015764511847583,
+          "date": "2023-04-27",
+          "value": 13120.602448418886
+        },
+        {
+          "cumulative_return": 32.222914120549355,
+          "daily_return": 0.7750327321921436,
+          "date": "2023-04-28",
+          "value": 13222.291412054936
+        },
+        {
+          "cumulative_return": 31.831197330717405,
+          "daily_return": -0.29625484541568925,
+          "date": "2023-05-01",
+          "value": 13183.11973307174
+        },
+        {
+          "cumulative_return": 31.379413361797088,
+          "daily_return": -0.34269882855342104,
+          "date": "2023-05-02",
+          "value": 13137.941336179709
+        },
+        {
+          "cumulative_return": 30.731679731499007,
+          "daily_return": -0.49302521127440974,
+          "date": "2023-05-03",
+          "value": 13073.1679731499
+        },
+        {
+          "cumulative_return": 30.278350108175562,
+          "daily_return": -0.346763404443748,
+          "date": "2023-05-04",
+          "value": 13027.835010817556
+        },
+        {
+          "cumulative_return": 34.489686594905834,
+          "daily_return": 3.232568176702745,
+          "date": "2023-05-05",
+          "value": 13448.968659490583
+        },
+        {
+          "cumulative_return": 34.04321975933266,
+          "daily_return": -0.3319710580618491,
+          "date": "2023-05-08",
+          "value": 13404.321975933266
+        },
+        {
+          "cumulative_return": 33.00535150042306,
+          "daily_return": -0.7742788190055705,
+          "date": "2023-05-09",
+          "value": 13300.535150042306
+        },
+        {
+          "cumulative_return": 34.83298414176821,
+          "daily_return": 1.3741045910768035,
+          "date": "2023-05-10",
+          "value": 13483.298414176821
+        },
+        {
+          "cumulative_return": 34.44877410700219,
+          "daily_return": -0.2849525560912066,
+          "date": "2023-05-11",
+          "value": 13444.87741070022
+        },
+        {
+          "cumulative_return": 33.83338624752394,
+          "daily_return": -0.45771176685366377,
+          "date": "2023-05-12",
+          "value": 13383.338624752394
+        },
+        {
+          "cumulative_return": 33.73543112944184,
+          "daily_return": -0.07319184011449327,
+          "date": "2023-05-15",
+          "value": 13373.543112944184
+        },
+        {
+          "cumulative_return": 34.21244504378272,
+          "daily_return": 0.3566847695575741,
+          "date": "2023-05-16",
+          "value": 13421.244504378272
+        },
+        {
+          "cumulative_return": 35.07749777380832,
+          "daily_return": 0.6445398783573333,
+          "date": "2023-05-17",
+          "value": 13507.749777380832
+        },
+        {
+          "cumulative_return": 36.97145956336593,
+          "daily_return": 1.402129755711878,
+          "date": "2023-05-18",
+          "value": 13697.145956336593
+        },
+        {
+          "cumulative_return": 36.977811375016664,
+          "daily_return": 0.004637324936871886,
+          "date": "2023-05-19",
+          "value": 13697.781137501666
+        },
+        {
+          "cumulative_return": 37.18839039843002,
+          "daily_return": 0.15373221494745237,
+          "date": "2023-05-22",
+          "value": 13718.839039843002
+        },
+        {
+          "cumulative_return": 34.88863592664364,
+          "daily_return": -1.6763477325649128,
+          "date": "2023-05-23",
+          "value": 13488.863592664364
+        },
+        {
+          "cumulative_return": 34.70524545514198,
+          "daily_return": -0.1359569471822627,
+          "date": "2023-05-24",
+          "value": 13470.524545514198
+        },
+        {
+          "cumulative_return": 37.69715024757177,
+          "daily_return": 2.221075194451968,
+          "date": "2023-05-25",
+          "value": 13769.715024757177
+        }
+      ]
+    }
+  },
+  {
+    "name": "基础回测(带基准SPY)",
+    "method": "POST",
+    "path": "/api/backtest/run",
+    "status_code": 200,
+    "success": true,
+    "response": {
+      "annual_returns": [
+        {
+          "annual_return": 43.055130313122994,
+          "end_value": 14305.513031312299,
+          "start_value": 10000.0,
+          "volatility": 22.78679252521745,
+          "year": 2023
+        }
+      ],
+      "backtest_id": "bt_c43fe5cbbd4b",
+      "benchmark_comparison": null,
+      "config_summary": {
+        "asset_count": 3,
+        "benchmark": "SPY",
+        "end_date": "2023-06-30",
+        "initial_amount": 10000,
+        "start_date": "2023-01-01"
+      },
+      "created_at": "2025-08-17T04:02:47.481356",
+      "performance_summary": {
+        "annualized_return_pct": 108.25354749483647,
+        "end_value": 14305.513031312299,
+        "start_value": 10000,
+        "total_return_pct": 43.055130313122994
+      },
+      "portfolio_composition": [
+        {
+          "symbol": "AAPL",
+          "weight": 40
+        },
+        {
+          "symbol": "MSFT",
+          "weight": 30
+        },
+        {
+          "symbol": "GOOGL",
+          "weight": 30
+        }
+      ],
+      "risk_metrics": {
+        "max_drawdown_pct": -9.498220466582493,
+        "positive_rate_pct": 54.09836065573771,
+        "sharpe_ratio": 3.3377938264979563,
+        "sortino_ratio": 6.016148153512603,
+        "volatility_annual_pct": 2297.0179489917355
+      },
+      "status": "completed",
+      "time_series": [
+        {
+          "cumulative_return": 0.0,
+          "daily_return": 0.0,
+          "date": "2023-01-03",
+          "value": 10000.0
+        },
+        {
+          "cumulative_return": -1.2498131724762243,
+          "daily_return": -1.2498131724762243,
+          "date": "2023-01-04",
+          "value": 9875.018682752378
+        },
+        {
+          "cumulative_return": -3.161466446482591,
+          "daily_return": -1.9358477542379176,
+          "date": "2023-01-05",
+          "value": 9683.85335535174
+        },
+        {
+          "cumulative_return": -0.9784739725258078,
+          "daily_return": 2.254260152287789,
+          "date": "2023-01-06",
+          "value": 9902.15260274742
+        },
+        {
+          "cumulative_return": -0.3058391473793745,
+          "daily_return": 0.6792814170121012,
+          "date": "2023-01-09",
+          "value": 9969.416085262063
+        },
+        {
+          "cumulative_return": 0.23094719265445746,
+          "daily_return": 0.5384330791723813,
+          "date": "2023-01-10",
+          "value": 10023.094719265446
+        },
+        {
+          "cumulative_return": 3.0237028862075386,
+          "daily_return": 2.7863207639703433,
+          "date": "2023-01-11",
+          "value": 10302.370288620754
+        },
+        {
+          "cumulative_return": 3.2099346784235787,
+          "daily_return": 0.18076596647058793,
+          "date": "2023-01-12",
+          "value": 10320.993467842358
+        },
+        {
+          "cumulative_return": 4.065111141321668,
+          "daily_return": 0.8285795990110891,
+          "date": "2023-01-13",
+          "value": 10406.511114132167
+        },
+        {
+          "cumulative_return": 4.303353502028403,
+          "daily_return": 0.2289358634165103,
+          "date": "2023-01-17",
+          "value": 10430.33535020284
+        },
+        {
+          "cumulative_return": 3.444153099234245,
+          "daily_return": -0.8237514652656392,
+          "date": "2023-01-18",
+          "value": 10344.415309923425
+        },
+        {
+          "cumulative_return": 3.6271826267033793,
+          "daily_return": 0.1769355947006049,
+          "date": "2023-01-19",
+          "value": 10362.718262670338
+        },
+        {
+          "cumulative_return": 7.1698023488947005,
+          "daily_return": 3.4186201268762795,
+          "date": "2023-01-20",
+          "value": 10716.98023488947
+        },
+        {
+          "cumulative_return": 9.09736424901921,
+          "daily_return": 1.7986054447028572,
+          "date": "2023-01-23",
+          "value": 10909.736424901921
+        },
+        {
+          "cumulative_return": 8.780350941408505,
+          "daily_return": -0.29057833779293607,
+          "date": "2023-01-24",
+          "value": 10878.03509414085
+        },
+        {
+          "cumulative_return": 7.55217708313934,
+          "daily_return": -1.1290401691484582,
+          "date": "2023-01-25",
+          "value": 10755.217708313934
+        },
+        {
+          "cumulative_return": 9.92340249898818,
+          "daily_return": 2.2047209830218955,
+          "date": "2023-01-26",
+          "value": 10992.340249898818
+        },
+        {
+          "cumulative_return": 11.196256962407842,
+          "daily_return": 1.1579467469917326,
+          "date": "2023-01-27",
+          "value": 11119.625696240784
+        },
+        {
+          "cumulative_return": 8.758736764186088,
+          "daily_return": -2.192088353338915,
+          "date": "2023-01-30",
+          "value": 10875.873676418609
+        },
+        {
+          "cumulative_return": 10.449499685220362,
+          "daily_return": 1.5545996315682087,
+          "date": "2023-01-31",
+          "value": 11044.949968522036
+        },
+        {
+          "cumulative_return": 11.967919316915431,
+          "daily_return": 1.3747637028891444,
+          "date": "2023-02-01",
+          "value": 11196.791931691543
+        },
+        {
+          "cumulative_return": 17.636323817495615,
+          "daily_return": 5.062525529778094,
+          "date": "2023-02-02",
+          "value": 11763.632381749561
+        },
+        {
+          "cumulative_return": 17.034225068059897,
+          "daily_return": -0.5118306403129624,
+          "date": "2023-02-03",
+          "value": 11703.42250680599
+        },
+        {
+          "cumulative_return": 15.317628275532424,
+          "daily_return": -1.4667476898567098,
+          "date": "2023-02-06",
+          "value": 11531.762827553242
+        },
+        {
+          "cumulative_return": 19.19821951067217,
+          "daily_return": 3.365132714893957,
+          "date": "2023-02-07",
+          "value": 11919.821951067217
+        },
+        {
+          "cumulative_return": 15.437310403783414,
+          "daily_return": -3.155172218450823,
+          "date": "2023-02-08",
+          "value": 11543.731040378341
+        },
+        {
+          "cumulative_return": 13.24436596878546,
+          "daily_return": -1.89968427653706,
+          "date": "2023-02-09",
+          "value": 11324.436596878546
+        },
+        {
+          "cumulative_return": 13.149649649540535,
+          "daily_return": -0.08363887989892019,
+          "date": "2023-02-10",
+          "value": 11314.964964954053
+        },
+        {
+          "cumulative_return": 15.102099748706731,
+          "daily_return": 1.7255467473505581,
+          "date": "2023-02-13",
+          "value": 11510.209974870673
+        },
+        {
+          "cumulative_return": 15.023897084767851,
+          "daily_return": -0.06794199594066136,
+          "date": "2023-02-14",
+          "value": 11502.389708476785
+        },
+        {
+          "cumulative_return": 16.19452588438697,
+          "daily_return": 1.0177266022871854,
+          "date": "2023-02-15",
+          "value": 11619.452588438697
+        },
+        {
+          "cumulative_return": 14.29418694104872,
+          "daily_return": -1.635480612252832,
+          "date": "2023-02-16",
+          "value": 11429.418694104872
+        },
+        {
+          "cumulative_return": 13.018702278800593,
+          "daily_return": -1.1159663464826988,
+          "date": "2023-02-17",
+          "value": 11301.87022788006
+        },
+        {
+          "cumulative_return": 10.176662855924224,
+          "daily_return": -2.5146629412408874,
+          "date": "2023-02-21",
+          "value": 11017.666285592422
+        },
+        {
+          "cumulative_return": 10.121660973586076,
+          "daily_return": -0.04992153593367754,
+          "date": "2023-02-22",
+          "value": 11012.166097358608
+        },
+        {
+          "cumulative_return": 10.432020614313405,
+          "daily_return": 0.28183341767953557,
+          "date": "2023-02-23",
+          "value": 11043.20206143134
+        },
+        {
+          "cumulative_return": 8.281217586694712,
+          "daily_return": -1.9476262551877306,
+          "date": "2023-02-24",
+          "value": 10828.121758669471
+        },
+        {
+          "cumulative_return": 9.035881266843916,
+          "daily_return": 0.6969479074660284,
+          "date": "2023-02-27",
+          "value": 10903.588126684392
+        },
+        {
+          "cumulative_return": 8.84360082739755,
+          "daily_return": -0.17634602225647056,
+          "date": "2023-02-28",
+          "value": 10884.360082739755
+        },
+        {
+          "cumulative_return": 7.8765098293075795,
+          "daily_return": -0.888514336845184,
+          "date": "2023-03-01",
+          "value": 10787.650982930758
+        },
+        {
+          "cumulative_return": 9.228334256274374,
+          "daily_return": 1.2531221385506264,
+          "date": "2023-03-02",
+          "value": 10922.833425627437
+        },
+        {
+          "cumulative_return": 11.948468117703833,
+          "daily_return": 2.4903189085053783,
+          "date": "2023-03-03",
+          "value": 11194.846811770383
+        },
+        {
+          "cumulative_return": 13.541884476702162,
+          "daily_return": 1.4233480687944686,
+          "date": "2023-03-06",
+          "value": 11354.188447670216
+        },
+        {
+          "cumulative_return": 12.058636066519048,
+          "daily_return": -1.3063447176512772,
+          "date": "2023-03-07",
+          "value": 11205.863606651905
+        },
+        {
+          "cumulative_return": 12.540229669334549,
+          "daily_return": 0.429769288401496,
+          "date": "2023-03-08",
+          "value": 11254.022966933455
+        },
+        {
+          "cumulative_return": 10.98699177387387,
+          "daily_return": -1.38016236507105,
+          "date": "2023-03-09",
+          "value": 11098.699177387387
+        },
+        {
+          "cumulative_return": 9.280412497013021,
+          "daily_return": -1.5376390057835352,
+          "date": "2023-03-10",
+          "value": 10928.041249701302
+        },
+        {
+          "cumulative_return": 10.742087480180253,
+          "daily_return": 1.337545265220502,
+          "date": "2023-03-13",
+          "value": 11074.208748018025
+        },
+        {
+          "cumulative_return": 13.246302046175535,
+          "daily_return": 2.2613033788472383,
+          "date": "2023-03-14",
+          "value": 11324.630204617553
+        },
+        {
+          "cumulative_return": 14.67853188377665,
+          "daily_return": 1.2647034046349108,
+          "date": "2023-03-15",
+          "value": 11467.853188377665
+        },
+        {
+          "cumulative_return": 18.362545110733937,
+          "daily_return": 3.212469820149883,
+          "date": "2023-03-16",
+          "value": 11836.254511073394
+        },
+        {
+          "cumulative_return": 18.933357968198326,
+          "daily_return": 0.4822580123892787,
+          "date": "2023-03-17",
+          "value": 11893.335796819832
+        },
+        {
+          "cumulative_return": 18.663626291813415,
+          "daily_return": -0.22679228182309646,
+          "date": "2023-03-20",
+          "value": 11866.362629181342
+        },
+        {
+          "cumulative_return": 20.705879574012016,
+          "daily_return": 1.721044052013345,
+          "date": "2023-03-21",
+          "value": 12070.587957401201
+        },
+        {
+          "cumulative_return": 19.532632052161027,
+          "daily_return": -0.971988710070748,
+          "date": "2023-03-22",
+          "value": 11953.263205216103
+        },
+        {
+          "cumulative_return": 21.309753909747776,
+          "daily_return": 1.4867252791783772,
+          "date": "2023-03-23",
+          "value": 12130.975390974778
+        },
+        {
+          "cumulative_return": 22.043999877561546,
+          "daily_return": 0.6052654004722761,
+          "date": "2023-03-24",
+          "value": 12204.399987756155
+        },
+        {
+          "cumulative_return": 19.883871105093604,
+          "daily_return": -1.7699590103856417,
+          "date": "2023-03-27",
+          "value": 11988.38711050936
+        },
+        {
+          "cumulative_return": 19.05633346458959,
+          "daily_return": -0.6902827151607176,
+          "date": "2023-03-28",
+          "value": 11905.633346458959
+        },
+        {
+          "cumulative_return": 20.83970806433601,
+          "daily_return": 1.4979250140244262,
+          "date": "2023-03-29",
+          "value": 12083.970806433601
+        },
+        {
+          "cumulative_return": 21.62505714279374,
+          "daily_return": 0.6499097780338924,
+          "date": "2023-03-30",
+          "value": 12162.505714279374
+        },
+        {
+          "cumulative_return": 23.9281858331066,
+          "daily_return": 1.893630099272122,
+          "date": "2023-03-31",
+          "value": 12392.81858331066
+        },
+        {
+          "cumulative_return": 24.412730538904725,
+          "daily_return": 0.3909882990223541,
+          "date": "2023-04-03",
+          "value": 12441.273053890473
+        },
+        {
+          "cumulative_return": 24.354660502371132,
+          "daily_return": -0.04667531713358844,
+          "date": "2023-04-04",
+          "value": 12435.466050237113
+        },
+        {
+          "cumulative_return": 23.315017335533938,
+          "daily_return": -0.8360307226421736,
+          "date": "2023-04-05",
+          "value": 12331.501733553394
+        },
+        {
+          "cumulative_return": 25.844332650157973,
+          "daily_return": 2.051100806110173,
+          "date": "2023-04-06",
+          "value": 12584.433265015798
+        },
+        {
+          "cumulative_return": 24.057967599437216,
+          "daily_return": -1.419503773512615,
+          "date": "2023-04-10",
+          "value": 12405.796759943722
+        },
+        {
+          "cumulative_return": 22.47356889721368,
+          "daily_return": -1.2771438488653122,
+          "date": "2023-04-11",
+          "value": 12247.356889721368
+        },
+        {
+          "cumulative_return": 22.093199006101987,
+          "daily_return": -0.3105730440752665,
+          "date": "2023-04-12",
+          "value": 12209.319900610199
+        },
+        {
+          "cumulative_return": 25.578413645415548,
+          "daily_return": 2.8545526431323816,
+          "date": "2023-04-13",
+          "value": 12557.841364541555
+        },
+        {
+          "cumulative_return": 25.486579836253732,
+          "daily_return": -0.07312865841825324,
+          "date": "2023-04-14",
+          "value": 12548.657983625373
+        },
+        {
+          "cumulative_return": 24.850680833329353,
+          "daily_return": -0.5067466208371909,
+          "date": "2023-04-17",
+          "value": 12485.068083332935
+        },
+        {
+          "cumulative_return": 24.699056294033053,
+          "daily_return": -0.12144470361255928,
+          "date": "2023-04-18",
+          "value": 12469.905629403305
+        },
+        {
+          "cumulative_return": 24.972942971810788,
+          "daily_return": 0.2196381319293451,
+          "date": "2023-04-19",
+          "value": 12497.294297181079
+        },
+        {
+          "cumulative_return": 24.73893062203315,
+          "daily_return": -0.18725041133937667,
+          "date": "2023-04-20",
+          "value": 12473.893062203315
+        },
+        {
+          "cumulative_return": 24.213297043684378,
+          "daily_return": -0.421386952515629,
+          "date": "2023-04-21",
+          "value": 12421.329704368438
+        },
+        {
+          "cumulative_return": 24.000222281590066,
+          "daily_return": -0.17153941418958973,
+          "date": "2023-04-24",
+          "value": 12400.022228159007
+        },
+        {
+          "cumulative_return": 21.989753911031514,
+          "daily_return": -1.621342553719796,
+          "date": "2023-04-25",
+          "value": 12198.975391103151
+        },
+        {
+          "cumulative_return": 24.443811147028775,
+          "daily_return": 2.0116912751435114,
+          "date": "2023-04-26",
+          "value": 12444.381114702877
+        },
+        {
+          "cumulative_return": 28.426895203729906,
+          "daily_return": 3.2007088339613556,
+          "date": "2023-04-27",
+          "value": 12842.689520372991
+        },
+        {
+          "cumulative_return": 29.054563114949524,
+          "daily_return": 0.48873556448118893,
+          "date": "2023-04-28",
+          "value": 12905.456311494952
+        },
+        {
+          "cumulative_return": 28.765200500132927,
+          "daily_return": -0.22421726735757783,
+          "date": "2023-05-01",
+          "value": 12876.520050013292
+        },
+        {
+          "cumulative_return": 27.77719577376494,
+          "daily_return": -0.7672917236415602,
+          "date": "2023-05-02",
+          "value": 12777.719577376494
+        },
+        {
+          "cumulative_return": 27.331570176638525,
+          "daily_return": -0.3487520558170783,
+          "date": "2023-05-03",
+          "value": 12733.157017663852
+        },
+        {
+          "cumulative_return": 26.684274360716522,
+          "daily_return": -0.5083545384888107,
+          "date": "2023-05-04",
+          "value": 12668.427436071652
+        },
+        {
+          "cumulative_return": 30.13030816200171,
+          "daily_return": 2.7201748746439303,
+          "date": "2023-05-05",
+          "value": 13013.030816200171
+        },
+        {
+          "cumulative_return": 30.597398405563197,
+          "daily_return": 0.3589403960989614,
+          "date": "2023-05-08",
+          "value": 13059.73984055632
+        },
+        {
+          "cumulative_return": 29.694762972203172,
+          "daily_return": -0.6911588166227803,
+          "date": "2023-05-09",
+          "value": 12969.476297220317
+        },
+        {
+          "cumulative_return": 32.41582618792518,
+          "daily_return": 2.0980517280448696,
+          "date": "2023-05-10",
+          "value": 13241.582618792518
+        },
+        {
+          "cumulative_return": 33.823045103341606,
+          "daily_return": 1.0627271346095002,
+          "date": "2023-05-11",
+          "value": 13382.304510334161
+        },
+        {
+          "cumulative_return": 33.69486628616902,
+          "daily_return": -0.09578231990880941,
+          "date": "2023-05-12",
+          "value": 13369.486628616902
+        },
+        {
+          "cumulative_return": 33.25936881766458,
+          "daily_return": -0.3257398586810878,
+          "date": "2023-05-15",
+          "value": 13325.936881766458
+        },
+        {
+          "cumulative_return": 34.55545711372466,
+          "daily_return": 0.9726057593995393,
+          "date": "2023-05-16",
+          "value": 13455.545711372466
+        },
+        {
+          "cumulative_return": 35.571912501750845,
+          "daily_return": 0.7554174388981433,
+          "date": "2023-05-17",
+          "value": 13557.191250175085
+        },
+        {
+          "cumulative_return": 37.56741954036581,
+          "daily_return": 1.4719177459336859,
+          "date": "2023-05-18",
+          "value": 13756.74195403658
+        },
+        {
+          "cumulative_return": 37.55648537994799,
+          "daily_return": -0.00794821946530048,
+          "date": "2023-05-19",
+          "value": 13755.648537994799
+        },
+        {
+          "cumulative_return": 38.37672473696253,
+          "daily_return": 0.5962927554807328,
+          "date": "2023-05-22",
+          "value": 13837.672473696253
+        },
+        {
+          "cumulative_return": 35.94697708774591,
+          "daily_return": -1.7558933078053995,
+          "date": "2023-05-23",
+          "value": 13594.69770877459
+        },
+        {
+          "cumulative_return": 35.30060002546023,
+          "daily_return": -0.4754626223637792,
+          "date": "2023-05-24",
+          "value": 13530.060002546023
+        },
+        {
+          "cumulative_return": 38.05645330917549,
+          "daily_return": 2.036837444325211,
+          "date": "2023-05-25",
+          "value": 13805.645330917549
+        }
+      ]
+    }
+  },
+  {
+    "name": "回测(月度再平衡)",
+    "method": "POST",
+    "path": "/api/backtest/run",
+    "status_code": 200,
+    "success": true,
+    "response": {
+      "annual_returns": [
+        {
+          "annual_return": 57.063658886344356,
+          "end_value": 15706.365888634436,
+          "start_value": 10000.0,
+          "volatility": 0.19773298943174236,
+          "year": 2023
+        }
+      ],
+      "backtest_id": "bt_291f303df468",
+      "benchmark_comparison": null,
+      "config_summary": {
+        "asset_count": 2,
+        "benchmark": null,
+        "end_date": "2023-12-31",
+        "initial_amount": 10000,
+        "start_date": "2023-01-01"
+      },
+      "created_at": "2025-08-17T04:02:47.518559",
+      "performance_summary": {
+        "annualized_return_pct": 57.63197467567114,
+        "end_value": 15706.365888634436,
+        "start_value": 10000,
+        "total_return_pct": 57.063658886344356
+      },
+      "portfolio_composition": [
+        {
+          "symbol": "AAPL",
+          "weight": 50
+        },
+        {
+          "symbol": "MSFT",
+          "weight": 50
+        }
+      ],
+      "risk_metrics": {
+        "max_drawdown_pct": -12.351027785984886,
+        "positive_rate_pct": 55.020080321285135,
+        "sharpe_ratio": 2.4022408043602708,
+        "sortino_ratio": 3.992049921668689,
+        "volatility_annual_pct": 19.851957025492368
+      },
+      "status": "completed",
+      "time_series": [
+        {
+          "daily_return": 0,
+          "date": "2023-01-03",
+          "rebalanced": true,
+          "value": 10000.0
+        },
+        {
+          "daily_return": -0.016714514216595488,
+          "date": "2023-01-04",
+          "rebalanced": false,
+          "value": 9832.854857834045
+        },
+        {
+          "daily_return": -0.01985961603345544,
+          "date": "2023-01-05",
+          "rebalanced": false,
+          "value": 9637.578135844764
+        },
+        {
+          "daily_return": 0.024754829622236848,
+          "date": "2023-01-06",
+          "rebalanced": false,
+          "value": 9876.154740568596
+        },
+        {
+          "daily_return": 0.006773074511511149,
+          "date": "2023-01-09",
+          "rebalanced": false,
+          "value": 9943.046672513681
+        },
+        {
+          "daily_return": 0.005963404902312568,
+          "date": "2023-01-10",
+          "rebalanced": false,
+          "value": 10002.341085784472
+        },
+        {
+          "daily_return": 0.025469684121898317,
+          "date": "2023-01-11",
+          "rebalanced": false,
+          "value": 10257.097553718888
+        },
+        {
+          "daily_return": 0.005263272023491494,
+          "date": "2023-01-12",
+          "rebalanced": false,
+          "value": 10311.0834483156
+        },
+        {
+          "daily_return": 0.006691304935650421,
+          "date": "2023-01-13",
+          "rebalanced": false,
+          "value": 10380.078051885217
+        },
+        {
+          "daily_return": 0.00679653733071228,
+          "date": "2023-01-17",
+          "rebalanced": false,
+          "value": 10450.626639860562
+        },
+        {
+          "daily_return": -0.011858911218585783,
+          "date": "2023-01-18",
+          "rebalanced": false,
+          "value": 10326.693586359868
+        },
+        {
+          "daily_return": -0.00760908618766168,
+          "date": "2023-01-19",
+          "rebalanced": false,
+          "value": 10248.116884827683
+        },
+        {
+          "daily_return": 0.02702475691980055,
+          "date": "2023-01-20",
+          "rebalanced": false,
+          "value": 10525.069752525855
+        },
+        {
+          "daily_return": 0.016986135329088957,
+          "date": "2023-01-23",
+          "rebalanced": false,
+          "value": 10703.85001169036
+        },
+        {
+          "daily_return": 0.004250719127835114,
+          "date": "2023-01-24",
+          "rebalanced": false,
+          "value": 10749.34907167653
+        },
+        {
+          "daily_return": -0.0052681776332483025,
+          "date": "2023-01-25",
+          "rebalanced": false,
+          "value": 10692.719591325145
+        },
+        {
+          "daily_return": 0.022275092073426622,
+          "date": "2023-01-26",
+          "rebalanced": false,
+          "value": 10930.900904737246
+        },
+        {
+          "daily_return": 0.007510316794411997,
+          "date": "2023-01-27",
+          "rebalanced": false,
+          "value": 11012.995433380147
+        },
+        {
+          "daily_return": -0.02096378203629882,
+          "date": "2023-01-30",
+          "rebalanced": false,
+          "value": 10782.121397548011
+        },
+        {
+          "daily_return": 0.014654337702690466,
+          "date": "2023-01-31",
+          "rebalanced": false,
+          "value": 10940.126245659085
+        },
+        {
+          "daily_return": 0.01358966254499153,
+          "date": "2023-02-01",
+          "rebalanced": true,
+          "value": 11088.798869537197
+        },
+        {
+          "daily_return": 0.041973371544094584,
+          "date": "2023-02-02",
+          "rebalanced": false,
+          "value": 11554.233144466018
+        },
+        {
+          "daily_return": 0.00027662430527788186,
+          "date": "2023-02-03",
+          "rebalanced": false,
+          "value": 11557.429326182624
+        },
+        {
+          "daily_return": -0.01213620607534484,
+          "date": "2023-02-06",
+          "rebalanced": false,
+          "value": 11417.165982178838
+        },
+        {
+          "daily_return": 0.030481621272531175,
+          "date": "2023-02-07",
+          "rebalanced": false,
+          "value": 11765.17971165324
+        },
+        {
+          "daily_return": -0.01039363424617159,
+          "date": "2023-02-08",
+          "rebalanced": false,
+          "value": 11642.896736889837
+        },
+        {
+          "daily_return": -0.009297833923359224,
+          "date": "2023-02-09",
+          "rebalanced": false,
+          "value": 11534.643016643415
+        },
+        {
+          "daily_return": 0.0002357843273273915,
+          "date": "2023-02-10",
+          "rebalanced": false,
+          "value": 11537.362704688056
+        },
+        {
+          "daily_return": 0.025027912574857043,
+          "date": "2023-02-13",
+          "rebalanced": false,
+          "value": 11826.118809805404
+        },
+        {
+          "daily_return": -0.0005219990335840483,
+          "date": "2023-02-14",
+          "rebalanced": false,
+          "value": 11819.945587215636
+        },
+        {
+          "daily_return": 0.0028432578909358096,
+          "date": "2023-02-15",
+          "rebalanced": false,
+          "value": 11853.552740776919
+        },
+        {
+          "daily_return": -0.018520347651800138,
+          "date": "2023-02-16",
+          "rebalanced": false,
+          "value": 11634.020823108782
+        },
+        {
+          "daily_return": -0.011538256896039942,
+          "date": "2023-02-17",
+          "rebalanced": false,
+          "value": 11499.784502117875
+        },
+        {
+          "daily_return": -0.02382099281307522,
+          "date": "2023-02-21",
+          "rebalanced": false,
+          "value": 11225.84821814101
+        },
+        {
+          "daily_return": -0.0008097972958160471,
+          "date": "2023-02-22",
+          "rebalanced": false,
+          "value": 11216.757556610719
+        },
+        {
+          "daily_return": 0.008059468754271971,
+          "date": "2023-02-23",
+          "rebalanced": false,
+          "value": 11307.158663662467
+        },
+        {
+          "daily_return": -0.01987781171945778,
+          "date": "2023-02-24",
+          "rebalanced": false,
+          "value": 11082.397092664149
+        },
+        {
+          "daily_return": 0.006033909133793266,
+          "date": "2023-02-27",
+          "rebalanced": false,
+          "value": 11149.267269705899
+        },
+        {
+          "daily_return": -0.003206082472693541,
+          "date": "2023-02-28",
+          "rebalanced": false,
+          "value": 11113.521799329119
+        },
+        {
+          "daily_return": -0.013447993248741094,
+          "date": "2023-03-01",
+          "rebalanced": true,
+          "value": 10964.067233202004
+        },
+        {
+          "daily_return": 0.011891128508798454,
+          "date": "2023-03-02",
+          "rebalanced": false,
+          "value": 11094.442365651115
+        },
+        {
+          "daily_return": 0.025797374024941096,
+          "date": "2023-03-03",
+          "rebalanced": false,
+          "value": 11380.64984495597
+        },
+        {
+          "daily_return": 0.012372286843601723,
+          "date": "2023-03-06",
+          "rebalanced": false,
+          "value": 11521.454509304356
+        },
+        {
+          "daily_return": -0.012557169393501745,
+          "date": "2023-03-07",
+          "rebalanced": false,
+          "value": 11376.777653371497
+        },
+        {
+          "daily_return": 0.0033308217058167326,
+          "date": "2023-03-08",
+          "rebalanced": false,
+          "value": 11414.671671321597
+        },
+        {
+          "daily_return": -0.010226692305819858,
+          "date": "2023-03-09",
+          "rebalanced": false,
+          "value": 11297.937336367033
+        },
+        {
+          "daily_return": -0.014328114058423389,
+          "date": "2023-03-10",
+          "rebalanced": false,
+          "value": 11136.059201586646
+        },
+        {
+          "daily_return": 0.017328285373073668,
+          "date": "2023-03-13",
+          "rebalanced": false,
+          "value": 11329.028013363182
+        },
+        {
+          "daily_return": 0.02055832712838403,
+          "date": "2023-03-14",
+          "rebalanced": false,
+          "value": 11561.93387730853
+        },
+        {
+          "daily_return": 0.01025801929880189,
+          "date": "2023-03-15",
+          "rebalanced": false,
+          "value": 11680.536418153431
+        },
+        {
+          "daily_return": 0.02974331922207973,
+          "date": "2023-03-16",
+          "rebalanced": false,
+          "value": 12027.954341523697
+        },
+        {
+          "daily_return": 0.0033116024904057788,
+          "date": "2023-03-17",
+          "rebalanced": false,
+          "value": 12067.786145075574
+        },
+        {
+          "daily_return": -0.005778130492468366,
+          "date": "2023-03-20",
+          "rebalanced": false,
+          "value": 11998.056901974125
+        },
+        {
+          "daily_return": 0.008787221114691166,
+          "date": "2023-03-21",
+          "rebalanced": false,
+          "value": 12103.486480918418
+        },
+        {
+          "daily_return": -0.00726006534509306,
+          "date": "2023-03-22",
+          "rebalanced": false,
+          "value": 12015.6143781635
+        },
+        {
+          "daily_return": 0.013402270545217154,
+          "date": "2023-03-23",
+          "rebalanced": false,
+          "value": 12176.650892826648
+        },
+        {
+          "daily_return": 0.009409406074100636,
+          "date": "2023-03-24",
+          "rebalanced": false,
+          "value": 12291.225945699814
+        },
+        {
+          "daily_return": -0.013634970181327366,
+          "date": "2023-03-27",
+          "rebalanced": false,
+          "value": 12123.63544643824
+        },
+        {
+          "daily_return": -0.004071914123390127,
+          "date": "2023-03-28",
+          "rebalanced": false,
+          "value": 12074.269044037055
+        },
+        {
+          "daily_return": 0.019482761136855754,
+          "date": "2023-03-29",
+          "rebalanced": false,
+          "value": 12309.50914372416
+        },
+        {
+          "daily_return": 0.011274753434699534,
+          "date": "2023-03-30",
+          "rebalanced": false,
+          "value": 12448.29582422183
+        },
+        {
+          "daily_return": 0.015297749787566178,
+          "date": "2023-03-31",
+          "rebalanced": false,
+          "value": 12638.72673902238
+        },
+        {
+          "daily_return": 0.0019065378532348225,
+          "date": "2023-04-03",
+          "rebalanced": true,
+          "value": 12662.822949967018
+        },
+        {
+          "daily_return": -0.001712012248670506,
+          "date": "2023-04-04",
+          "rebalanced": false,
+          "value": 12641.144041973928
+        },
+        {
+          "daily_return": -0.01058858028574679,
+          "date": "2023-04-05",
+          "rebalanced": false,
+          "value": 12507.292273381798
+        },
+        {
+          "daily_return": 0.015536691988116979,
+          "date": "2023-04-06",
+          "rebalanced": false,
+          "value": 12701.614221038686
+        },
+        {
+          "daily_return": -0.011724689746562291,
+          "date": "2023-04-10",
+          "rebalanced": false,
+          "value": 12552.691735016484
+        },
+        {
+          "daily_return": -0.015252981830070256,
+          "date": "2023-04-11",
+          "rebalanced": false,
+          "value": 12361.225756063805
+        },
+        {
+          "daily_return": -0.0009809387452068567,
+          "date": "2023-04-12",
+          "rebalanced": false,
+          "value": 12349.100150781433
+        },
+        {
+          "daily_return": 0.028181070446622877,
+          "date": "2023-04-13",
+          "rebalanced": false,
+          "value": 12697.111012083005
+        },
+        {
+          "daily_return": -0.007473589398599233,
+          "date": "2023-04-14",
+          "rebalanced": false,
+          "value": 12602.218017830264
+        },
+        {
+          "daily_return": 0.00471304516169268,
+          "date": "2023-04-17",
+          "rebalanced": false,
+          "value": 12661.612840485795
+        },
+        {
+          "daily_return": 0.0029829409555627434,
+          "date": "2023-04-18",
+          "rebalanced": false,
+          "value": 12699.38168399116
+        },
+        {
+          "daily_return": 0.0036191779705863534,
+          "date": "2023-04-19",
+          "rebalanced": false,
+          "value": 12745.343006421928
+        },
+        {
+          "daily_return": -0.0069767931721028565,
+          "date": "2023-04-20",
+          "rebalanced": false,
+          "value": 12656.421384358615
+        },
+        {
+          "daily_return": -0.005516606688315453,
+          "date": "2023-04-21",
+          "rebalanced": false,
+          "value": 12586.600885499523
+        },
+        {
+          "daily_return": -0.006049363698311323,
+          "date": "2023-04-24",
+          "rebalanced": false,
+          "value": 12510.45995901765
+        },
+        {
+          "daily_return": -0.01593957300158245,
+          "date": "2023-04-25",
+          "rebalanced": false,
+          "value": 12311.048569217513
+        },
+        {
+          "daily_return": 0.035689691082008666,
+          "date": "2023-04-26",
+          "rebalanced": false,
+          "value": 12750.426089548491
+        },
+        {
+          "daily_return": 0.030250050324021113,
+          "date": "2023-04-27",
+          "rebalanced": false,
+          "value": 13136.127120410045
+        },
+        {
+          "daily_return": 0.007761269833238457,
+          "date": "2023-04-28",
+          "rebalanced": false,
+          "value": 13238.080147555269
+        },
+        {
+          "daily_return": -0.0030896356987320673,
+          "date": "2023-05-01",
+          "rebalanced": true,
+          "value": 13197.179302548706
+        },
+        {
+          "daily_return": -0.003341119026156405,
+          "date": "2023-05-02",
+          "rebalanced": false,
+          "value": 13153.085955689363
+        },
+        {
+          "daily_return": -0.0048827377620288635,
+          "date": "2023-05-03",
+          "rebalanced": false,
+          "value": 13088.862886206307
+        },
+        {
+          "daily_return": -0.0032681913255037946,
+          "date": "2023-05-04",
+          "rebalanced": false,
+          "value": 13046.085978060899
+        },
+        {
+          "daily_return": 0.03187698302535618,
+          "date": "2023-05-05",
+          "rebalanced": false,
+          "value": 13461.955839330883
+        },
+        {
+          "daily_return": -0.0034107034905508705,
+          "date": "2023-05-08",
+          "rebalanced": false,
+          "value": 13416.041099560036
+        },
+        {
+          "daily_return": -0.007673227682566107,
+          "date": "2023-05-09",
+          "rebalanced": false,
+          "value": 13313.096761604447
+        },
+        {
+          "daily_return": 0.01384479885986045,
+          "date": "2023-05-10",
+          "rebalanced": false,
+          "value": 13497.41390847072
+        },
+        {
+          "daily_return": -0.0029722214168015986,
+          "date": "2023-05-11",
+          "rebalanced": false,
+          "value": 13457.296605780528
+        },
+        {
+          "daily_return": -0.004550800381416968,
+          "date": "2023-05-12",
+          "rebalanced": false,
+          "value": 13396.0551352541
+        },
+        {
+          "daily_return": -0.0006644360267470378,
+          "date": "2023-05-15",
+          "rebalanced": false,
+          "value": 13387.154313605948
+        },
+        {
+          "daily_return": 0.003677928733253177,
+          "date": "2023-05-16",
+          "rebalanced": false,
+          "value": 13436.391313112454
+        },
+        {
+          "daily_return": 0.006533358482274532,
+          "date": "2023-05-17",
+          "rebalanced": false,
+          "value": 13524.176074269137
+        },
+        {
+          "daily_return": 0.014032374884058615,
+          "date": "2023-05-18",
+          "rebalanced": false,
+          "value": 13713.952382941297
+        },
+        {
+          "daily_return": 2.8395599861569883e-05,
+          "date": "2023-05-19",
+          "rebalanced": false,
+          "value": 13714.341798845684
+        },
+        {
+          "daily_return": 0.0017543511902381355,
+          "date": "2023-05-22",
+          "rebalanced": false,
+          "value": 13738.401570703822
+        },
+        {
+          "daily_return": -0.01681303529778979,
+          "date": "2023-05-23",
+          "rebalanced": false,
+          "value": 13507.417340160368
+        },
+        {
+          "daily_return": -0.0014515125989777212,
+          "date": "2023-05-24",
+          "rebalanced": false,
+          "value": 13487.811153711475
+        },
+        {
+          "daily_return": 0.022689455632693773,
+          "date": "2023-05-25",
+          "rebalanced": false,
+          "value": 13793.842246465763
+        }
+      ]
+    }
+  },
+  {
+    "name": "定期定投(每月)",
+    "method": "POST",
+    "path": "/api/backtest/dca/periodic",
+    "status_code": 200,
+    "success": true,
+    "response": {
+      "config_summary": {
+        "end_date": "2023-12-31",
+        "frequency": "monthly",
+        "initial_amount": 1000,
+        "investment_amount": 500,
+        "start_date": "2023-01-01",
+        "total_investments": 12
+      },
+      "created_at": "2025-08-17T04:02:47.524054",
+      "dca_id": "dca_f401772fb26d",
+      "investment_schedule": [
+        "2023-01-15",
+        "2023-02-15",
+        "2023-03-15",
+        "2023-04-15",
+        "2023-05-15",
+        "2023-06-15",
+        "2023-07-15",
+        "2023-08-15",
+        "2023-09-15",
+        "2023-10-15",
+        "2023-11-15",
+        "2023-12-15"
+      ],
+      "performance": {
+        "average_cost": 20.0,
+        "best_return": 30.626829995838246,
+        "current_return": 22.30620500937126,
+        "final_value": 6115.310250468563,
+        "investment_count": 0,
+        "total_invested": 5000,
+        "total_return": 1115.310250468563,
+        "total_return_pct": 22.30620500937126,
+        "worst_return": -2.9073698683287263
+      },
+      "status": "completed",
+      "time_series": [
+        {
+          "date": "2023-01-03",
+          "invested": 1000,
+          "return_pct": 0.0,
+          "value": 1000.0
+        },
+        {
+          "date": "2023-01-04",
+          "invested": 1000,
+          "return_pct": -1.1308759544835651,
+          "value": 988.6912404551643
+        },
+        {
+          "date": "2023-01-05",
+          "invested": 1000,
+          "return_pct": -2.9073698683287263,
+          "value": 970.9263013167127
+        },
+        {
+          "date": "2023-01-06",
+          "invested": 1000,
+          "return_pct": -0.2631667246005009,
+          "value": 997.368332753995
+        },
+        {
+          "date": "2023-01-09",
+          "invested": 1000,
+          "return_pct": 0.35671871911372366,
+          "value": 1003.5671871911372
+        },
+        {
+          "date": "2023-01-10",
+          "invested": 1000,
+          "return_pct": 0.92382639187706,
+          "value": 1009.2382639187706
+        },
+        {
+          "date": "2023-01-11",
+          "invested": 1000,
+          "return_pct": 3.4032288546818563,
+          "value": 1034.0322885468186
+        },
+        {
+          "date": "2023-01-12",
+          "invested": 1000,
+          "return_pct": 3.8223255679879227,
+          "value": 1038.2232556798792
+        },
+        {
+          "date": "2023-01-13",
+          "invested": 1000,
+          "return_pct": 4.590158556150505,
+          "value": 1045.901585561505
+        },
+        {
+          "date": "2023-01-17",
+          "invested": 1000,
+          "return_pct": 5.343241562044546,
+          "value": 1053.4324156204455
+        },
+        {
+          "date": "2023-01-18",
+          "invested": 1000,
+          "return_pct": 4.235042376633647,
+          "value": 1042.3504237663365
+        },
+        {
+          "date": "2023-01-19",
+          "invested": 1000,
+          "return_pct": 3.616022215589919,
+          "value": 1036.1602221558992
+        },
+        {
+          "date": "2023-01-20",
+          "invested": 1000,
+          "return_pct": 6.247412515117321,
+          "value": 1062.4741251511732
+        },
+        {
+          "date": "2023-01-23",
+          "invested": 1000,
+          "return_pct": 8.195762815281729,
+          "value": 1081.9576281528173
+        },
+        {
+          "date": "2023-01-24",
+          "invested": 1000,
+          "return_pct": 8.786830825474045,
+          "value": 1087.8683082547404
+        },
+        {
+          "date": "2023-01-25",
+          "invested": 1000,
+          "return_pct": 8.226653676471415,
+          "value": 1082.2665367647141
+        },
+        {
+          "date": "2023-01-26",
+          "invested": 1000,
+          "return_pct": 10.467917041937426,
+          "value": 1104.6791704193743
+        },
+        {
+          "date": "2023-01-27",
+          "invested": 1000,
+          "return_pct": 11.439693307338802,
+          "value": 1114.396933073388
+        },
+        {
+          "date": "2023-01-30",
+          "invested": 1000,
+          "return_pct": 9.12416844383788,
+          "value": 1091.2416844383788
+        },
+        {
+          "date": "2023-01-31",
+          "invested": 1000,
+          "return_pct": 10.594484988213935,
+          "value": 1105.9448498821394
+        },
+        {
+          "date": "2023-02-01",
+          "invested": 1000,
+          "return_pct": 11.96616382237021,
+          "value": 1119.661638223702
+        },
+        {
+          "date": "2023-02-02",
+          "invested": 1000,
+          "return_pct": 16.530380617175684,
+          "value": 1165.3038061717568
+        },
+        {
+          "date": "2023-02-03",
+          "invested": 1000,
+          "return_pct": 17.252308745479514,
+          "value": 1172.5230874547951
+        },
+        {
+          "date": "2023-02-06",
+          "invested": 1000,
+          "return_pct": 15.65965827243774,
+          "value": 1156.5965827243774
+        },
+        {
+          "date": "2023-02-07",
+          "invested": 1000,
+          "return_pct": 18.861942549058288,
+          "value": 1188.619425490583
+        },
+        {
+          "date": "2023-02-08",
+          "invested": 1000,
+          "return_pct": 17.41373055823258,
+          "value": 1174.1373055823258
+        },
+        {
+          "date": "2023-02-09",
+          "invested": 1000,
+          "return_pct": 16.390759190797258,
+          "value": 1163.9075919079726
+        },
+        {
+          "date": "2023-02-10",
+          "invested": 1000,
+          "return_pct": 16.48170047727781,
+          "value": 1164.817004772778
+        },
+        {
+          "date": "2023-02-13",
+          "invested": 1000,
+          "return_pct": 19.21864115408066,
+          "value": 1192.1864115408066
+        },
+        {
+          "date": "2023-02-14",
+          "invested": 1000,
+          "return_pct": 19.048245203671947,
+          "value": 1190.4824520367195
+        },
+        {
+          "date": "2023-02-15",
+          "invested": 1500,
+          "return_pct": 13.138949126600922,
+          "value": 1697.0842368990138
+        },
+        {
+          "date": "2023-02-16",
+          "invested": 1500,
+          "return_pct": 11.256437230379015,
+          "value": 1668.8465584556852
+        },
+        {
+          "date": "2023-02-17",
+          "invested": 1500,
+          "return_pct": 10.076648338657773,
+          "value": 1651.1497250798666
+        },
+        {
+          "date": "2023-02-21",
+          "invested": 1500,
+          "return_pct": 7.380643486891343,
+          "value": 1610.7096523033701
+        },
+        {
+          "date": "2023-02-22",
+          "invested": 1500,
+          "return_pct": 7.386883732986766,
+          "value": 1610.8032559948015
+        },
+        {
+          "date": "2023-02-23",
+          "invested": 1500,
+          "return_pct": 8.132090569689474,
+          "value": 1621.9813585453421
+        },
+        {
+          "date": "2023-02-24",
+          "invested": 1500,
+          "return_pct": 6.03004327668726,
+          "value": 1590.450649150309
+        },
+        {
+          "date": "2023-02-27",
+          "invested": 1500,
+          "return_pct": 6.724816321759226,
+          "value": 1600.8722448263884
+        },
+        {
+          "date": "2023-02-28",
+          "invested": 1500,
+          "return_pct": 6.376596552551154,
+          "value": 1595.6489482882673
+        },
+        {
+          "date": "2023-03-01",
+          "invested": 1500,
+          "return_pct": 4.926123715401749,
+          "value": 1573.8918557310262
+        },
+        {
+          "date": "2023-03-02",
+          "invested": 1500,
+          "return_pct": 5.975247028567022,
+          "value": 1589.6287054285053
+        },
+        {
+          "date": "2023-03-03",
+          "invested": 1500,
+          "return_pct": 8.947837019118955,
+          "value": 1634.2175552867843
+        },
+        {
+          "date": "2023-03-06",
+          "invested": 1500,
+          "return_pct": 10.459743231336006,
+          "value": 1656.89614847004
+        },
+        {
+          "date": "2023-03-07",
+          "invested": 1500,
+          "return_pct": 9.020162732162362,
+          "value": 1635.3024409824354
+        },
+        {
+          "date": "2023-03-08",
+          "invested": 1500,
+          "return_pct": 9.517971903067656,
+          "value": 1642.7695785460148
+        },
+        {
+          "date": "2023-03-09",
+          "invested": 1500,
+          "return_pct": 8.271802582418347,
+          "value": 1624.0770387362752
+        },
+        {
+          "date": "2023-03-10",
+          "invested": 1500,
+          "return_pct": 6.7323923551229194,
+          "value": 1600.9858853268438
+        },
+        {
+          "date": "2023-03-13",
+          "invested": 1500,
+          "return_pct": 8.475677127052252,
+          "value": 1627.1351569057838
+        },
+        {
+          "date": "2023-03-14",
+          "invested": 1500,
+          "return_pct": 10.534380101769086,
+          "value": 1658.0157015265363
+        },
+        {
+          "date": "2023-03-15",
+          "invested": 2000,
+          "return_pct": 8.597326885162897,
+          "value": 2171.946537703258
+        },
+        {
+          "date": "2023-03-16",
+          "invested": 2000,
+          "return_pct": 11.54636207991755,
+          "value": 2230.927241598351
+        },
+        {
+          "date": "2023-03-17",
+          "invested": 2000,
+          "return_pct": 11.688663119778948,
+          "value": 2233.773262395579
+        },
+        {
+          "date": "2023-03-20",
+          "invested": 2000,
+          "return_pct": 11.59115705353795,
+          "value": 2231.823141070759
+        },
+        {
+          "date": "2023-03-21",
+          "invested": 2000,
+          "return_pct": 12.654334573727125,
+          "value": 2253.0866914745425
+        },
+        {
+          "date": "2023-03-22",
+          "invested": 2000,
+          "return_pct": 11.787646711822708,
+          "value": 2235.752934236454
+        },
+        {
+          "date": "2023-03-23",
+          "invested": 2000,
+          "return_pct": 13.117075984706434,
+          "value": 2262.3415196941287
+        },
+        {
+          "date": "2023-03-24",
+          "invested": 2000,
+          "return_pct": 14.152277568395357,
+          "value": 2283.045551367907
+        },
+        {
+          "date": "2023-03-27",
+          "invested": 2000,
+          "return_pct": 12.631555306837116,
+          "value": 2252.6311061367423
+        },
+        {
+          "date": "2023-03-28",
+          "invested": 2000,
+          "return_pct": 12.175341780218469,
+          "value": 2243.5068356043694
+        },
+        {
+          "date": "2023-03-29",
+          "invested": 2000,
+          "return_pct": 14.368897805761002,
+          "value": 2287.37795611522
+        },
+        {
+          "date": "2023-03-30",
+          "invested": 2000,
+          "return_pct": 15.621370685011335,
+          "value": 2312.4274137002267
+        },
+        {
+          "date": "2023-03-31",
+          "invested": 2000,
+          "return_pct": 17.399469186702913,
+          "value": 2347.9893837340583
+        },
+        {
+          "date": "2023-04-03",
+          "invested": 2000,
+          "return_pct": 17.782152866234515,
+          "value": 2355.6430573246903
+        },
+        {
+          "date": "2023-04-04",
+          "invested": 2000,
+          "return_pct": 17.539395729227635,
+          "value": 2350.7879145845527
+        },
+        {
+          "date": "2023-04-05",
+          "invested": 2000,
+          "return_pct": 16.276126852450055,
+          "value": 2325.522537049001
+        },
+        {
+          "date": "2023-04-06",
+          "invested": 2000,
+          "return_pct": 17.818125905536476,
+          "value": 2356.3625181107295
+        },
+        {
+          "date": "2023-04-10",
+          "invested": 2000,
+          "return_pct": 16.324216365511756,
+          "value": 2326.484327310235
+        },
+        {
+          "date": "2023-04-11",
+          "invested": 2000,
+          "return_pct": 14.749663539194852,
+          "value": 2294.993270783897
+        },
+        {
+          "date": "2023-04-12",
+          "invested": 2000,
+          "return_pct": 14.54985339118166,
+          "value": 2290.997067823633
+        },
+        {
+          "date": "2023-04-13",
+          "invested": 2000,
+          "return_pct": 17.930543315571708,
+          "value": 2358.610866311434
+        },
+        {
+          "date": "2023-04-14",
+          "invested": 2000,
+          "return_pct": 17.191943768798275,
+          "value": 2343.8388753759655
+        },
+        {
+          "date": "2023-04-17",
+          "invested": 2000,
+          "return_pct": 17.62221523853682,
+          "value": 2352.4443047707364
+        },
+        {
+          "date": "2023-04-18",
+          "invested": 2000,
+          "return_pct": 18.09328165994773,
+          "value": 2361.8656331989546
+        },
+        {
+          "date": "2023-04-19",
+          "invested": 2000,
+          "return_pct": 18.610379384532372,
+          "value": 2372.2075876906474
+        },
+        {
+          "date": "2023-04-20",
+          "invested": 2000,
+          "return_pct": 17.81334514513469,
+          "value": 2356.266902902694
+        },
+        {
+          "date": "2023-04-21",
+          "invested": 2000,
+          "return_pct": 17.049084321671582,
+          "value": 2340.9816864334316
+        },
+        {
+          "date": "2023-04-24",
+          "invested": 2000,
+          "return_pct": 16.551492058171448,
+          "value": 2331.029841163429
+        },
+        {
+          "date": "2023-04-25",
+          "invested": 2000,
+          "return_pct": 14.866712033768408,
+          "value": 2297.334240675368
+        },
+        {
+          "date": "2023-04-26",
+          "invested": 2000,
+          "return_pct": 18.024294168491313,
+          "value": 2360.4858833698263
+        },
+        {
+          "date": "2023-04-27",
+          "invested": 2000,
+          "return_pct": 21.5456628588714,
+          "value": 2430.913257177428
+        },
+        {
+          "date": "2023-04-28",
+          "invested": 2000,
+          "return_pct": 22.483045241986154,
+          "value": 2449.660904839723
+        },
+        {
+          "date": "2023-05-01",
+          "invested": 2000,
+          "return_pct": 22.174482635255163,
+          "value": 2443.4896527051033
+        },
+        {
+          "date": "2023-05-02",
+          "invested": 2000,
+          "return_pct": 21.694126866311624,
+          "value": 2433.8825373262325
+        },
+        {
+          "date": "2023-05-03",
+          "invested": 2000,
+          "return_pct": 21.060057296292552,
+          "value": 2421.201145925851
+        },
+        {
+          "date": "2023-05-04",
+          "invested": 2000,
+          "return_pct": 20.498299758308143,
+          "value": 2409.965995166163
+        },
+        {
+          "date": "2023-05-05",
+          "invested": 2000,
+          "return_pct": 24.711893845674332,
+          "value": 2494.2378769134866
+        },
+        {
+          "date": "2023-05-08",
+          "invested": 2000,
+          "return_pct": 24.364459620750882,
+          "value": 2487.2891924150176
+        },
+        {
+          "date": "2023-05-09",
+          "invested": 2000,
+          "return_pct": 23.35066791457375,
+          "value": 2467.013358291475
+        },
+        {
+          "date": "2023-05-10",
+          "invested": 2000,
+          "return_pct": 24.970638448624776,
+          "value": 2499.4127689724955
+        },
+        {
+          "date": "2023-05-11",
+          "invested": 2000,
+          "return_pct": 24.704566305807223,
+          "value": 2494.0913261161445
+        },
+        {
+          "date": "2023-05-12",
+          "invested": 2000,
+          "return_pct": 24.114586097197073,
+          "value": 2482.2917219439414
+        },
+        {
+          "date": "2023-05-15",
+          "invested": 2500,
+          "return_pct": 19.179610247521286,
+          "value": 2979.490256188032
+        },
+        {
+          "date": "2023-05-16",
+          "invested": 2500,
+          "return_pct": 19.527643430691477,
+          "value": 2988.191085767287
+        },
+        {
+          "date": "2023-05-17",
+          "invested": 2500,
+          "return_pct": 20.23661857158415,
+          "value": 3005.9154642896037
+        },
+        {
+          "date": "2023-05-18",
+          "invested": 2500,
+          "return_pct": 21.914800638894995,
+          "value": 3047.870015972375
+        },
+        {
+          "date": "2023-05-19",
+          "invested": 2500,
+          "return_pct": 21.93324568685588,
+          "value": 3048.331142171397
+        },
+        {
+          "date": "2023-05-22",
+          "invested": 2500,
+          "return_pct": 21.96633198178024,
+          "value": 3049.158299544506
+        },
+        {
+          "date": "2023-05-23",
+          "invested": 2500,
+          "return_pct": 19.95691948022275,
+          "value": 2998.9229870055688
+        },
+        {
+          "date": "2023-05-24",
+          "invested": 2500,
+          "return_pct": 19.858287999247658,
+          "value": 2996.4571999811915
+        },
+        {
+          "date": "2023-05-25",
+          "invested": 2500,
+          "return_pct": 22.185570462028554,
+          "value": 3054.639261550714
+        }
+      ]
+    }
+  },
+  {
+    "name": "定期定投(每周)",
+    "method": "POST",
+    "path": "/api/backtest/dca/periodic",
+    "status_code": 200,
+    "success": true,
+    "response": {
+      "config_summary": {
+        "end_date": "2023-03-31",
+        "frequency": "weekly",
+        "initial_amount": 1000,
+        "investment_amount": 200,
+        "start_date": "2023-01-01",
+        "total_investments": 13
+      },
+      "created_at": "2025-08-17T04:02:48.162743",
+      "dca_id": "dca_02e00738f837",
+      "investment_schedule": [
+        "2023-01-01",
+        "2023-01-08",
+        "2023-01-15",
+        "2023-01-22",
+        "2023-01-29",
+        "2023-02-05",
+        "2023-02-12",
+        "2023-02-19",
+        "2023-02-26",
+        "2023-03-05",
+        "2023-03-12",
+        "2023-03-19",
+        "2023-03-26"
+      ],
+      "performance": {
+        "average_cost": 16.39344262295082,
+        "best_return": 9.442778028889075,
+        "current_return": 6.412668409074127,
+        "final_value": 1064.1266840907413,
+        "investment_count": 0,
+        "total_invested": 1000,
+        "total_return": 64.12668409074126,
+        "total_return_pct": 6.412668409074127,
+        "worst_return": -0.3781285562489984
+      },
+      "status": "completed",
+      "time_series": [
+        {
+          "date": "2023-01-03",
+          "invested": 1000,
+          "return_pct": 1.1368683772161604e-14,
+          "value": 1000.0000000000001
+        },
+        {
+          "date": "2023-01-04",
+          "invested": 1000,
+          "return_pct": 0.7720145412636271,
+          "value": 1007.7201454126363
+        },
+        {
+          "date": "2023-01-05",
+          "invested": 1000,
+          "return_pct": -0.3781285562489984,
+          "value": 996.21871443751
+        },
+        {
+          "date": "2023-01-06",
+          "invested": 1000,
+          "return_pct": 1.9064084990315564,
+          "value": 1019.0640849903156
+        },
+        {
+          "date": "2023-01-09",
+          "invested": 1000,
+          "return_pct": 1.8486340232313183,
+          "value": 1018.4863402323132
+        },
+        {
+          "date": "2023-01-10",
+          "invested": 1000,
+          "return_pct": 2.562882377715596,
+          "value": 1025.628823777156
+        },
+        {
+          "date": "2023-01-11",
+          "invested": 1000,
+          "return_pct": 3.8600809953390125,
+          "value": 1038.6008099533901
+        },
+        {
+          "date": "2023-01-12",
+          "invested": 1000,
+          "return_pct": 4.238209551588011,
+          "value": 1042.38209551588
+        },
+        {
+          "date": "2023-01-13",
+          "invested": 1000,
+          "return_pct": 4.642614304147901,
+          "value": 1046.426143041479
+        },
+        {
+          "date": "2023-01-17",
+          "invested": 1000,
+          "return_pct": 4.450922406392306,
+          "value": 1044.509224063923
+        },
+        {
+          "date": "2023-01-18",
+          "invested": 1000,
+          "return_pct": 2.801846561768002,
+          "value": 1028.01846561768
+        },
+        {
+          "date": "2023-01-19",
+          "invested": 1000,
+          "return_pct": 2.053472308163259,
+          "value": 1020.5347230816326
+        },
+        {
+          "date": "2023-01-20",
+          "invested": 1000,
+          "return_pct": 3.9546338569535466,
+          "value": 1039.5463385695355
+        },
+        {
+          "date": "2023-01-23",
+          "invested": 1000,
+          "return_pct": 5.2019325686490445,
+          "value": 1052.0193256864904
+        },
+        {
+          "date": "2023-01-24",
+          "invested": 1000,
+          "return_pct": 5.089019525700564,
+          "value": 1050.8901952570056
+        },
+        {
+          "date": "2023-01-25",
+          "invested": 1000,
+          "return_pct": 5.128425531145967,
+          "value": 1051.2842553114597
+        },
+        {
+          "date": "2023-01-26",
+          "invested": 1000,
+          "return_pct": 6.283815578899839,
+          "value": 1062.8381557889984
+        },
+        {
+          "date": "2023-01-27",
+          "invested": 1000,
+          "return_pct": 6.5280184241725925,
+          "value": 1065.280184241726
+        },
+        {
+          "date": "2023-01-30",
+          "invested": 1000,
+          "return_pct": 5.1914303791456184,
+          "value": 1051.9143037914562
+        },
+        {
+          "date": "2023-01-31",
+          "invested": 1000,
+          "return_pct": 6.738103659345779,
+          "value": 1067.3810365934578
+        },
+        {
+          "date": "2023-02-01",
+          "invested": 1000,
+          "return_pct": 7.872472750050974,
+          "value": 1078.7247275005097
+        },
+        {
+          "date": "2023-02-02",
+          "invested": 1000,
+          "return_pct": 9.442778028889075,
+          "value": 1094.4277802888907
+        },
+        {
+          "date": "2023-02-03",
+          "invested": 1000,
+          "return_pct": 8.279505122241925,
+          "value": 1082.7950512224193
+        },
+        {
+          "date": "2023-02-06",
+          "invested": 1000,
+          "return_pct": 7.617759426253884,
+          "value": 1076.1775942625388
+        },
+        {
+          "date": "2023-02-07",
+          "invested": 1000,
+          "return_pct": 9.02526004523652,
+          "value": 1090.2526004523652
+        },
+        {
+          "date": "2023-02-08",
+          "invested": 1000,
+          "return_pct": 7.833091611668329,
+          "value": 1078.3309161166833
+        },
+        {
+          "date": "2023-02-09",
+          "invested": 1000,
+          "return_pct": 6.898272410549248,
+          "value": 1068.9827241054925
+        },
+        {
+          "date": "2023-02-10",
+          "invested": 1000,
+          "return_pct": 7.147738784105082,
+          "value": 1071.4773878410508
+        },
+        {
+          "date": "2023-02-13",
+          "invested": 1000,
+          "return_pct": 8.405539685304007,
+          "value": 1084.05539685304
+        },
+        {
+          "date": "2023-02-14",
+          "invested": 1000,
+          "return_pct": 8.355664646438868,
+          "value": 1083.5566464643887
+        },
+        {
+          "date": "2023-02-15",
+          "invested": 1000,
+          "return_pct": 8.707517006376996,
+          "value": 1087.07517006377
+        },
+        {
+          "date": "2023-02-16",
+          "invested": 1000,
+          "return_pct": 7.210751921125666,
+          "value": 1072.1075192112567
+        },
+        {
+          "date": "2023-02-17",
+          "invested": 1000,
+          "return_pct": 6.942908788194063,
+          "value": 1069.4290878819406
+        },
+        {
+          "date": "2023-02-21",
+          "invested": 1000,
+          "return_pct": 4.797536105110089,
+          "value": 1047.975361051101
+        },
+        {
+          "date": "2023-02-22",
+          "invested": 1000,
+          "return_pct": 4.653124782672239,
+          "value": 1046.5312478267224
+        },
+        {
+          "date": "2023-02-23",
+          "invested": 1000,
+          "return_pct": 5.209815427542321,
+          "value": 1052.0981542754232
+        },
+        {
+          "date": "2023-02-24",
+          "invested": 1000,
+          "return_pct": 4.085915370256885,
+          "value": 1040.8591537025688
+        },
+        {
+          "date": "2023-02-27",
+          "invested": 1000,
+          "return_pct": 4.440436794930702,
+          "value": 1044.404367949307
+        },
+        {
+          "date": "2023-02-28",
+          "invested": 1000,
+          "return_pct": 4.054417090767515,
+          "value": 1040.5441709076752
+        },
+        {
+          "date": "2023-03-01",
+          "invested": 1000,
+          "return_pct": 3.6552758664907286,
+          "value": 1036.5527586649073
+        },
+        {
+          "date": "2023-03-02",
+          "invested": 1000,
+          "return_pct": 4.461424595895733,
+          "value": 1044.6142459589573
+        },
+        {
+          "date": "2023-03-03",
+          "invested": 1000,
+          "return_pct": 6.13676005878906,
+          "value": 1061.3676005878906
+        },
+        {
+          "date": "2023-03-06",
+          "invested": 1000,
+          "return_pct": 6.2102919633549165,
+          "value": 1062.1029196335492
+        },
+        {
+          "date": "2023-03-07",
+          "invested": 1000,
+          "return_pct": 4.582212208716555,
+          "value": 1045.8221220871656
+        },
+        {
+          "date": "2023-03-08",
+          "invested": 1000,
+          "return_pct": 4.752908016486208,
+          "value": 1047.529080164862
+        },
+        {
+          "date": "2023-03-09",
+          "invested": 1000,
+          "return_pct": 2.8202316101647056,
+          "value": 1028.202316101647
+        },
+        {
+          "date": "2023-03-10",
+          "invested": 1000,
+          "return_pct": 1.336588045026963,
+          "value": 1013.3658804502696
+        },
+        {
+          "date": "2023-03-13",
+          "invested": 1000,
+          "return_pct": 1.1921601445472674,
+          "value": 1011.9216014454727
+        },
+        {
+          "date": "2023-03-14",
+          "invested": 1000,
+          "return_pct": 2.8648762768304326,
+          "value": 1028.6487627683043
+        },
+        {
+          "date": "2023-03-15",
+          "invested": 1000,
+          "return_pct": 2.2215239182599813,
+          "value": 1022.2152391825998
+        },
+        {
+          "date": "2023-03-16",
+          "invested": 1000,
+          "return_pct": 4.0150110853221355,
+          "value": 1040.1501108532213
+        },
+        {
+          "date": "2023-03-17",
+          "invested": 1000,
+          "return_pct": 2.798804491091005,
+          "value": 1027.98804491091
+        },
+        {
+          "date": "2023-03-20",
+          "invested": 1000,
+          "return_pct": 3.787270235593041,
+          "value": 1037.8727023559304
+        },
+        {
+          "date": "2023-03-21",
+          "invested": 1000,
+          "return_pct": 5.150059875742613,
+          "value": 1051.5005987574261
+        },
+        {
+          "date": "2023-03-22",
+          "invested": 1000,
+          "return_pct": 3.357625414337076,
+          "value": 1033.5762541433708
+        },
+        {
+          "date": "2023-03-23",
+          "invested": 1000,
+          "return_pct": 3.637023442428745,
+          "value": 1036.3702344242874
+        },
+        {
+          "date": "2023-03-24",
+          "invested": 1000,
+          "return_pct": 4.317112741708888,
+          "value": 1043.1711274170889
+        },
+        {
+          "date": "2023-03-27",
+          "invested": 1000,
+          "return_pct": 4.5121699819573,
+          "value": 1045.121699819573
+        },
+        {
+          "date": "2023-03-28",
+          "invested": 1000,
+          "return_pct": 4.2775741119288115,
+          "value": 1042.775741119288
+        },
+        {
+          "date": "2023-03-29",
+          "invested": 1000,
+          "return_pct": 5.793213297811008,
+          "value": 1057.93213297811
+        },
+        {
+          "date": "2023-03-30",
+          "invested": 1000,
+          "return_pct": 6.412668409074127,
+          "value": 1064.1266840907413
+        }
+      ]
+    }
+  },
+  {
+    "name": "条件定投(下跌触发)",
+    "method": "POST",
+    "path": "/api/backtest/dca/conditional",
+    "status_code": 200,
+    "success": true,
+    "response": {
+      "config_summary": {
+        "condition_count": 1,
+        "end_date": "2023-06-30",
+        "initial_amount": 5000,
+        "start_date": "2023-01-01",
+        "total_triggers": 0
+      },
+      "created_at": "2025-08-17T04:02:48.168681",
+      "dca_id": "dca_cond_9c40eb90a4a8",
+      "performance": {
+        "average_cost": 40.65040650406504,
+        "best_return": 52.028559139380505,
+        "current_return": 52.028559139380505,
+        "final_value": 7601.427956969025,
+        "investment_count": 0,
+        "total_invested": 5000,
+        "total_return": 2601.427956969025,
+        "total_return_pct": 52.028559139380505,
+        "worst_return": -0.03997477790708217
+      },
+      "status": "completed",
+      "time_series": [
+        {
+          "date": "2023-01-03",
+          "invested": 5000,
+          "return_pct": 0.0,
+          "triggered": false,
+          "value": 5000.0
+        },
+        {
+          "date": "2023-01-04",
+          "invested": 5000,
+          "return_pct": 1.0314383502875535,
+          "triggered": false,
+          "value": 5051.571917514378
+        },
+        {
+          "date": "2023-01-05",
+          "invested": 5000,
+          "return_pct": -0.03997477790708217,
+          "triggered": false,
+          "value": 4998.001261104646
+        },
+        {
+          "date": "2023-01-06",
+          "invested": 5000,
+          "return_pct": 3.637958420910891,
+          "triggered": false,
+          "value": 5181.8979210455445
+        },
+        {
+          "date": "2023-01-09",
+          "invested": 5000,
+          "return_pct": 4.061720760154239,
+          "triggered": false,
+          "value": 5203.086038007712
+        },
+        {
+          "date": "2023-01-10",
+          "invested": 5000,
+          "return_pct": 4.525470249566461,
+          "triggered": false,
+          "value": 5226.273512478323
+        },
+        {
+          "date": "2023-01-11",
+          "invested": 5000,
+          "return_pct": 6.732236354988144,
+          "triggered": false,
+          "value": 5336.611817749407
+        },
+        {
+          "date": "2023-01-12",
+          "invested": 5000,
+          "return_pct": 6.668271761432097,
+          "triggered": false,
+          "value": 5333.413588071605
+        },
+        {
+          "date": "2023-01-13",
+          "invested": 5000,
+          "return_pct": 7.747664998493983,
+          "triggered": false,
+          "value": 5387.383249924699
+        },
+        {
+          "date": "2023-01-17",
+          "invested": 5000,
+          "return_pct": 8.691148939576523,
+          "triggered": false,
+          "value": 5434.557446978826
+        },
+        {
+          "date": "2023-01-18",
+          "invested": 5000,
+          "return_pct": 8.107462744181266,
+          "triggered": false,
+          "value": 5405.373137209063
+        },
+        {
+          "date": "2023-01-19",
+          "invested": 5000,
+          "return_pct": 8.155442375479215,
+          "triggered": false,
+          "value": 5407.772118773961
+        },
+        {
+          "date": "2023-01-20",
+          "invested": 5000,
+          "return_pct": 10.234266921527015,
+          "triggered": false,
+          "value": 5511.713346076351
+        },
+        {
+          "date": "2023-01-23",
+          "invested": 5000,
+          "return_pct": 12.824808216023156,
+          "triggered": false,
+          "value": 5641.240410801158
+        },
+        {
+          "date": "2023-01-24",
+          "invested": 5000,
+          "return_pct": 13.960185937773822,
+          "triggered": false,
+          "value": 5698.009296888691
+        },
+        {
+          "date": "2023-01-25",
+          "invested": 5000,
+          "return_pct": 13.424479373676512,
+          "triggered": false,
+          "value": 5671.223968683826
+        },
+        {
+          "date": "2023-01-26",
+          "invested": 5000,
+          "return_pct": 15.103531396129947,
+          "triggered": false,
+          "value": 5755.176569806497
+        },
+        {
+          "date": "2023-01-27",
+          "invested": 5000,
+          "return_pct": 16.678681163905676,
+          "triggered": false,
+          "value": 5833.934058195284
+        },
+        {
+          "date": "2023-01-30",
+          "invested": 5000,
+          "return_pct": 14.335993390242837,
+          "triggered": false,
+          "value": 5716.799669512142
+        },
+        {
+          "date": "2023-01-31",
+          "invested": 5000,
+          "return_pct": 15.367394623744968,
+          "triggered": false,
+          "value": 5768.369731187248
+        },
+        {
+          "date": "2023-02-01",
+          "invested": 5000,
+          "return_pct": 16.278896268049504,
+          "triggered": false,
+          "value": 5813.944813402475
+        },
+        {
+          "date": "2023-02-02",
+          "invested": 5000,
+          "return_pct": 20.58848910742976,
+          "triggered": false,
+          "value": 6029.424455371488
+        },
+        {
+          "date": "2023-02-03",
+          "invested": 5000,
+          "return_pct": 23.53081092196053,
+          "triggered": false,
+          "value": 6176.540546098026
+        },
+        {
+          "date": "2023-02-06",
+          "invested": 5000,
+          "return_pct": 21.316064707671593,
+          "triggered": false,
+          "value": 6065.80323538358
+        },
+        {
+          "date": "2023-02-07",
+          "invested": 5000,
+          "return_pct": 23.650760000205374,
+          "triggered": false,
+          "value": 6182.538000010269
+        },
+        {
+          "date": "2023-02-08",
+          "invested": 5000,
+          "return_pct": 21.46802082721808,
+          "triggered": false,
+          "value": 6073.401041360904
+        },
+        {
+          "date": "2023-02-09",
+          "invested": 5000,
+          "return_pct": 20.628463885336842,
+          "triggered": false,
+          "value": 6031.423194266842
+        },
+        {
+          "date": "2023-02-10",
+          "invested": 5000,
+          "return_pct": 20.924742438893247,
+          "triggered": false,
+          "value": 6046.237121944662
+        },
+        {
+          "date": "2023-02-13",
+          "invested": 5000,
+          "return_pct": 23.1989497434395,
+          "triggered": false,
+          "value": 6159.947487171975
+        },
+        {
+          "date": "2023-02-14",
+          "invested": 5000,
+          "return_pct": 22.678423944582647,
+          "triggered": false,
+          "value": 6133.921197229132
+        },
+        {
+          "date": "2023-02-15",
+          "invested": 5000,
+          "return_pct": 24.384088702188713,
+          "triggered": false,
+          "value": 6219.2044351094355
+        },
+        {
+          "date": "2023-02-16",
+          "invested": 5000,
+          "return_pct": 23.086857051443804,
+          "triggered": false,
+          "value": 6154.34285257219
+        },
+        {
+          "date": "2023-02-17",
+          "invested": 5000,
+          "return_pct": 22.157935262511234,
+          "triggered": false,
+          "value": 6107.896763125562
+        },
+        {
+          "date": "2023-02-21",
+          "invested": 5000,
+          "return_pct": 18.898784567558195,
+          "triggered": false,
+          "value": 5944.93922837791
+        },
+        {
+          "date": "2023-02-22",
+          "invested": 5000,
+          "return_pct": 19.243141730507013,
+          "triggered": false,
+          "value": 5962.157086525351
+        },
+        {
+          "date": "2023-02-23",
+          "invested": 5000,
+          "return_pct": 19.63552801380101,
+          "triggered": false,
+          "value": 5981.776400690051
+        },
+        {
+          "date": "2023-02-24",
+          "invested": 5000,
+          "return_pct": 17.48144299916492,
+          "triggered": false,
+          "value": 5874.072149958246
+        },
+        {
+          "date": "2023-02-27",
+          "invested": 5000,
+          "return_pct": 18.45033956600455,
+          "triggered": false,
+          "value": 5922.5169783002275
+        },
+        {
+          "date": "2023-02-28",
+          "invested": 5000,
+          "return_pct": 18.041980692714276,
+          "triggered": false,
+          "value": 5902.099034635714
+        },
+        {
+          "date": "2023-03-01",
+          "invested": 5000,
+          "return_pct": 16.36034286754262,
+          "triggered": false,
+          "value": 5818.017143377131
+        },
+        {
+          "date": "2023-03-02",
+          "invested": 5000,
+          "return_pct": 16.840807282659718,
+          "triggered": false,
+          "value": 5842.040364132986
+        },
+        {
+          "date": "2023-03-03",
+          "invested": 5000,
+          "return_pct": 20.94075214567496,
+          "triggered": false,
+          "value": 6047.037607283748
+        },
+        {
+          "date": "2023-03-06",
+          "invested": 5000,
+          "return_pct": 23.182927664395955,
+          "triggered": false,
+          "value": 6159.146383219798
+        },
+        {
+          "date": "2023-03-07",
+          "invested": 5000,
+          "return_pct": 21.397214372881283,
+          "triggered": false,
+          "value": 6069.860718644064
+        },
+        {
+          "date": "2023-03-08",
+          "invested": 5000,
+          "return_pct": 22.41421429363694,
+          "triggered": false,
+          "value": 6120.710714681847
+        },
+        {
+          "date": "2023-03-09",
+          "invested": 5000,
+          "return_pct": 20.58841487385891,
+          "triggered": false,
+          "value": 6029.4207436929455
+        },
+        {
+          "date": "2023-03-10",
+          "invested": 5000,
+          "return_pct": 18.914806646601736,
+          "triggered": false,
+          "value": 5945.740332330087
+        },
+        {
+          "date": "2023-03-13",
+          "invested": 5000,
+          "return_pct": 20.492319516383123,
+          "triggered": false,
+          "value": 6024.615975819156
+        },
+        {
+          "date": "2023-03-14",
+          "invested": 5000,
+          "return_pct": 22.189967048336513,
+          "triggered": false,
+          "value": 6109.498352416826
+        },
+        {
+          "date": "2023-03-15",
+          "invested": 5000,
+          "return_pct": 22.510272534327306,
+          "triggered": false,
+          "value": 6125.513626716365
+        },
+        {
+          "date": "2023-03-16",
+          "invested": 5000,
+          "return_pct": 24.800489545655275,
+          "triggered": false,
+          "value": 6240.024477282764
+        },
+        {
+          "date": "2023-03-17",
+          "invested": 5000,
+          "return_pct": 24.119829562195754,
+          "triggered": false,
+          "value": 6205.991478109788
+        },
+        {
+          "date": "2023-03-20",
+          "invested": 5000,
+          "return_pct": 26.04169959492596,
+          "triggered": false,
+          "value": 6302.084979746298
+        },
+        {
+          "date": "2023-03-21",
+          "invested": 5000,
+          "return_pct": 27.547131667404155,
+          "triggered": false,
+          "value": 6377.356583370208
+        },
+        {
+          "date": "2023-03-22",
+          "invested": 5000,
+          "return_pct": 26.38603201335114,
+          "triggered": false,
+          "value": 6319.301600667557
+        },
+        {
+          "date": "2023-03-23",
+          "invested": 5000,
+          "return_pct": 27.266862820629484,
+          "triggered": false,
+          "value": 6363.343141031474
+        },
+        {
+          "date": "2023-03-24",
+          "invested": 5000,
+          "return_pct": 28.32388700833946,
+          "triggered": false,
+          "value": 6416.194350416973
+        },
+        {
+          "date": "2023-03-27",
+          "invested": 5000,
+          "return_pct": 26.746374138558078,
+          "triggered": false,
+          "value": 6337.318706927904
+        },
+        {
+          "date": "2023-03-28",
+          "invested": 5000,
+          "return_pct": 26.241870418744767,
+          "triggered": false,
+          "value": 6312.093520937238
+        },
+        {
+          "date": "2023-03-29",
+          "invested": 5000,
+          "return_pct": 28.74031259632966,
+          "triggered": false,
+          "value": 6437.015629816483
+        },
+        {
+          "date": "2023-03-30",
+          "invested": 5000,
+          "return_pct": 30.01352968690196,
+          "triggered": false,
+          "value": 6500.676484345098
+        },
+        {
+          "date": "2023-03-31",
+          "invested": 5000,
+          "return_pct": 32.04750478388967,
+          "triggered": false,
+          "value": 6602.375239194484
+        },
+        {
+          "date": "2023-04-03",
+          "invested": 5000,
+          "return_pct": 33.06446758785991,
+          "triggered": false,
+          "value": 6653.223379392995
+        },
+        {
+          "date": "2023-04-04",
+          "invested": 5000,
+          "return_pct": 32.63205703761161,
+          "triggered": false,
+          "value": 6631.602851880581
+        },
+        {
+          "date": "2023-04-05",
+          "invested": 5000,
+          "return_pct": 31.134605074000664,
+          "triggered": false,
+          "value": 6556.730253700033
+        },
+        {
+          "date": "2023-04-06",
+          "invested": 5000,
+          "return_pct": 31.855301696676307,
+          "triggered": false,
+          "value": 6592.765084833815
+        },
+        {
+          "date": "2023-04-10",
+          "invested": 5000,
+          "return_pct": 29.74925817464722,
+          "triggered": false,
+          "value": 6487.462908732361
+        },
+        {
+          "date": "2023-04-11",
+          "invested": 5000,
+          "return_pct": 28.764302411978626,
+          "triggered": false,
+          "value": 6438.215120598931
+        },
+        {
+          "date": "2023-04-12",
+          "invested": 5000,
+          "return_pct": 28.203764718429287,
+          "triggered": false,
+          "value": 6410.188235921464
+        },
+        {
+          "date": "2023-04-13",
+          "invested": 5000,
+          "return_pct": 32.57598594709014,
+          "triggered": false,
+          "value": 6628.799297354507
+        },
+        {
+          "date": "2023-04-14",
+          "invested": 5000,
+          "return_pct": 32.295741844839085,
+          "triggered": false,
+          "value": 6614.787092241954
+        },
+        {
+          "date": "2023-04-17",
+          "invested": 5000,
+          "return_pct": 32.31172680709719,
+          "triggered": false,
+          "value": 6615.586340354859
+        },
+        {
+          "date": "2023-04-18",
+          "invested": 5000,
+          "return_pct": 33.304712167680265,
+          "triggered": false,
+          "value": 6665.235608384013
+        },
+        {
+          "date": "2023-04-19",
+          "invested": 5000,
+          "return_pct": 34.23360921208919,
+          "triggered": false,
+          "value": 6711.68046060446
+        },
+        {
+          "date": "2023-04-20",
+          "invested": 5000,
+          "return_pct": 33.448824273239424,
+          "triggered": false,
+          "value": 6672.441213661971
+        },
+        {
+          "date": "2023-04-21",
+          "invested": 5000,
+          "return_pct": 32.14358776910365,
+          "triggered": false,
+          "value": 6607.179388455183
+        },
+        {
+          "date": "2023-04-24",
+          "invested": 5000,
+          "return_pct": 32.391837202314875,
+          "triggered": false,
+          "value": 6619.591860115744
+        },
+        {
+          "date": "2023-04-25",
+          "invested": 5000,
+          "return_pct": 31.142597555129704,
+          "triggered": false,
+          "value": 6557.129877756485
+        },
+        {
+          "date": "2023-04-26",
+          "invested": 5000,
+          "return_pct": 31.134605074000664,
+          "triggered": false,
+          "value": 6556.730253700033
+        },
+        {
+          "date": "2023-04-27",
+          "invested": 5000,
+          "return_pct": 34.85822284955088,
+          "triggered": false,
+          "value": 6742.911142477544
+        },
+        {
+          "date": "2023-04-28",
+          "invested": 5000,
+          "return_pct": 35.87516090899749,
+          "triggered": false,
+          "value": 6793.758045449875
+        },
+        {
+          "date": "2023-05-01",
+          "invested": 5000,
+          "return_pct": 35.803092483956114,
+          "triggered": false,
+          "value": 6790.154624197806
+        },
+        {
+          "date": "2023-05-02",
+          "invested": 5000,
+          "return_pct": 34.96228594363209,
+          "triggered": false,
+          "value": 6748.114297181604
+        },
+        {
+          "date": "2023-05-03",
+          "invested": 5000,
+          "return_pct": 34.08944761748282,
+          "triggered": false,
+          "value": 6704.472380874141
+        },
+        {
+          "date": "2023-05-04",
+          "invested": 5000,
+          "return_pct": 32.76015943638902,
+          "triggered": false,
+          "value": 6638.007971819451
+        },
+        {
+          "date": "2023-05-05",
+          "invested": 5000,
+          "return_pct": 38.99019949839138,
+          "triggered": false,
+          "value": 6949.509974919569
+        },
+        {
+          "date": "2023-05-08",
+          "invested": 5000,
+          "return_pct": 38.934140780131735,
+          "triggered": false,
+          "value": 6946.7070390065865
+        },
+        {
+          "date": "2023-05-09",
+          "invested": 5000,
+          "return_pct": 37.5488186253019,
+          "triggered": false,
+          "value": 6877.440931265095
+        },
+        {
+          "date": "2023-05-10",
+          "invested": 5000,
+          "return_pct": 38.98218227273872,
+          "triggered": false,
+          "value": 6949.109113636936
+        },
+        {
+          "date": "2023-05-11",
+          "invested": 5000,
+          "return_pct": 39.13433634847415,
+          "triggered": false,
+          "value": 6956.716817423708
+        },
+        {
+          "date": "2023-05-12",
+          "invested": 5000,
+          "return_pct": 38.38058104224305,
+          "triggered": false,
+          "value": 6919.029052112152
+        },
+        {
+          "date": "2023-05-15",
+          "invested": 5000,
+          "return_pct": 37.97962078151495,
+          "triggered": false,
+          "value": 6898.9810390757475
+        },
+        {
+          "date": "2023-05-16",
+          "invested": 5000,
+          "return_pct": 37.97962078151495,
+          "triggered": false,
+          "value": 6898.9810390757475
+        },
+        {
+          "date": "2023-05-17",
+          "invested": 5000,
+          "return_pct": 38.47678775007511,
+          "triggered": false,
+          "value": 6923.8393875037555
+        },
+        {
+          "date": "2023-05-18",
+          "invested": 5000,
+          "return_pct": 40.36923654422189,
+          "triggered": false,
+          "value": 7018.461827211095
+        },
+        {
+          "date": "2023-05-19",
+          "invested": 5000,
+          "return_pct": 40.457438398663086,
+          "triggered": false,
+          "value": 7022.8719199331545
+        },
+        {
+          "date": "2023-05-22",
+          "invested": 5000,
+          "return_pct": 39.68761152434121,
+          "triggered": false,
+          "value": 6984.3805762170605
+        },
+        {
+          "date": "2023-05-23",
+          "invested": 5000,
+          "return_pct": 37.570680411919604,
+          "triggered": false,
+          "value": 6878.53402059598
+        },
+        {
+          "date": "2023-05-24",
+          "invested": 5000,
+          "return_pct": 37.79518747471804,
+          "triggered": false,
+          "value": 6889.759373735902
+        },
+        {
+          "date": "2023-05-25",
+          "invested": 5000,
+          "return_pct": 38.71736638096432,
+          "triggered": false,
+          "value": 6935.868319048216
+        }
+      ],
+      "triggers": []
+    }
+  },
+  {
+    "name": "条件定投(回撤触发)",
+    "method": "POST",
+    "path": "/api/backtest/dca/conditional",
+    "status_code": 200,
+    "success": true,
+    "response": {
+      "created_at": "2025-08-17T04:02:48.186172",
+      "dca_id": "dca_cond_b0e759ab9ae8",
+      "error": "'drawdown_threshold'",
+      "status": "failed"
+    }
+  },
+  {
+    "name": "获取回测历史",
+    "method": "GET",
+    "path": "/api/backtest/history",
+    "status_code": 200,
+    "success": true,
+    "response": {
+      "limit": 5,
+      "offset": 0,
+      "results": [],
+      "total": 0
+    }
+  },
+  {
+    "name": "无效股票代码",
+    "method": "GET",
+    "path": "/api/stocks/info/INVALID_SYMBOL",
+    "status_code": 200,
+    "success": true,
+    "response": {
+      "currency": "USD",
+      "current_price": 0,
+      "dividend_yield": 0,
+      "exchange": "Unknown",
+      "industry": "Unknown",
+      "market_cap": 0,
+      "name": "Unknown",
+      "pe_ratio": 0,
+      "sector": "Unknown",
+      "symbol": "INVALID_SYMBOL"
+    }
+  },
+  {
+    "name": "权重不等于100%",
+    "method": "POST",
+    "path": "/api/backtest/run",
+    "status_code": 200,
+    "success": true,
+    "response": {
+      "backtest_id": "bt_e07493ba4d45",
+      "created_at": "2025-08-17T04:02:49.949324",
+      "error": "Weights must sum to 100%, got 70%",
+      "status": "failed"
+    }
+  },
+  {
+    "name": "金额超出限制",
+    "method": "POST",
+    "path": "/api/backtest/run",
+    "status_code": 200,
+    "success": true,
+    "response": {
+      "backtest_id": "bt_621637ff8ca4",
+      "created_at": "2025-08-17T04:02:49.954398",
+      "error": "Maximum initial amount is $1000000.0",
+      "status": "failed"
+    }
+  }
+]

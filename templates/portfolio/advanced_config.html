@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>高级投资组合配置 - 股票回测系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .config-container {
+            max-width: 1200px;
+            margin: 30px auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            overflow: hidden;
+        }
+        
+        .config-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .config-body {
+            padding: 40px;
+        }
+        
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+        
+        .asset-row {
+            background: #f8f9fa;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            transition: all 0.3s;
+            border: 1px solid #dee2e6;
+        }
+        
+        .asset-row:hover {
+            background: #e9ecef;
+            border-color: #667eea;
+            box-shadow: 0 2px 10px rgba(102, 126, 234, 0.1);
+        }
+        
+        .weight-input {
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .asset-symbol {
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+        
+        .asset-name {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+        
+        .weight-slider {
+            width: 100%;
+        }
+        
+        .weight-display {
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .total-weight {
+            font-size: 1.2rem;
+            font-weight: bold;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .total-weight.valid {
+            color: #28a745;
+            background: #d4edda;
+        }
+        
+        .total-weight.invalid {
+            color: #dc3545;
+            background: #f8d7da;
+        }
+        
+        .btn-run {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 40px;
+            font-size: 1.1rem;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-run:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-run:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .config-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 8px;
+        }
+        
+        .form-select, .form-control {
+            border: 1px solid #ced4da;
+            border-radius: 8px;
+            padding: 10px 15px;
+        }
+        
+        .form-select:focus, .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        
+        .form-check {
+            padding: 10px 0;
+        }
+        
+        .help-text {
+            font-size: 0.875rem;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+        
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        
+        .loading-overlay.show {
+            display: flex;
+        }
+        
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+            border-width: 0.3rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="config-container">
+        <div class="config-header">
+            <h1><i class="bi bi-graph-up"></i> 高级投资组合配置</h1>
+            <p class="mb-0">配置投资组合参数并执行回测分析</p>
+        </div>
+        
+        <div class="config-body">
+            <form id="backtestForm">
+                <!-- 投资组合资产配置 -->
+                <div class="config-section">
+                    <h3 class="section-title">
+                        <i class="bi bi-pie-chart"></i> 投资组合资产
+                    </h3>
+                    <div id="assetsContainer">
+                        <div class="asset-row">
+                            <div class="row align-items-center">
+                                <div class="col-md-4">
+                                    <input type="text" class="form-control asset-symbol" placeholder="股票代码 (如: AAPL)" value="AAPL">
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="input-group">
+                                        <input type="number" class="form-control weight-input" placeholder="权重" value="50" min="0" max="100" step="0.01">
+                                        <span class="input-group-text">%</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <input type="text" class="form-control asset-name" placeholder="名称 (可选)" readonly>
+                                </div>
+                                <div class="col-md-1">
+                                    <button type="button" class="btn btn-sm btn-danger remove-asset">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="asset-row">
+                            <div class="row align-items-center">
+                                <div class="col-md-4">
+                                    <input type="text" class="form-control asset-symbol" placeholder="股票代码 (如: MSFT)" value="MSFT">
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="input-group">
+                                        <input type="number" class="form-control weight-input" placeholder="权重" value="50" min="0" max="100" step="0.01">
+                                        <span class="input-group-text">%</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <input type="text" class="form-control asset-name" placeholder="名称 (可选)" readonly>
+                                </div>
+                                <div class="col-md-1">
+                                    <button type="button" class="btn btn-sm btn-danger remove-asset">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-secondary mt-3" id="addAsset">
+                        <i class="bi bi-plus-circle"></i> 添加资产
+                    </button>
+                    <div class="total-weight mt-3">
+                        总权重: <span id="totalWeight">100</span>%
+                    </div>
+                </div>
+                
+                <!-- 时间周期配置 -->
+                <div class="config-section">
+                    <h3 class="section-title">
+                        <i class="bi bi-calendar-range"></i> 时间周期
+                    </h3>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label">开始日期</label>
+                            <input type="date" class="form-control" id="startDate" value="2023-01-01">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">结束日期</label>
+                            <input type="date" class="form-control" id="endDate" value="2023-12-31">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 基本设置 -->
+                <div class="config-section">
+                    <h3 class="section-title">
+                        <i class="bi bi-gear"></i> 基本设置
+                    </h3>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label">初始投资金额</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" class="form-control" id="initialAmount" value="10000" min="100" max="1000000">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">基准指数（可选）</label>
+                            <select class="form-select" id="benchmark">
+                                <option value="">无基准</option>
+                                <option value="SPY">S&P 500 (SPY)</option>
+                                <option value="QQQ">纳斯达克100 (QQQ)</option>
+                                <option value="DIA">道琼斯 (DIA)</option>
+                                <option value="IWM">罗素2000 (IWM)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 再平衡策略 -->
+                <div class="config-section">
+                    <h3 class="section-title">
+                        <i class="bi bi-arrow-repeat"></i> 再平衡策略
+                    </h3>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label">再平衡频率</label>
+                            <select class="form-select" id="rebalanceFrequency">
+                                <option value="none">不再平衡</option>
+                                <option value="yearly" selected>年度再平衡</option>
+                                <option value="quarterly">季度再平衡</option>
+                                <option value="monthly">月度再平衡</option>
+                            </select>
+                            <small class="help-text">定期调整投资组合回到目标权重</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">股息处理</label>
+                            <select class="form-select" id="dividendReinvest">
+                                <option value="yes" selected>股息再投资</option>
+                                <option value="no">不再投资</option>
+                            </select>
+                            <small class="help-text">是否将股息自动再投资</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 现金流管理 -->
+                <div class="config-section">
+                    <h3 class="section-title">
+                        <i class="bi bi-cash-stack"></i> 现金流管理
+                    </h3>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label">现金流类型</label>
+                            <select class="form-select" id="cashflowType">
+                                <option value="none" selected>无现金流</option>
+                                <option value="periodic">定期定投</option>
+                                <option value="conditional">条件定投</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6" id="cashflowConfig" style="display: none;">
+                            <!-- 动态显示现金流配置 -->
+                        </div>
+                    </div>
+                    
+                    <!-- 定期定投配置 -->
+                    <div id="periodicConfig" style="display: none;" class="mt-3">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label class="form-label">投资频率</label>
+                                <select class="form-select" id="dcaFrequency">
+                                    <option value="monthly" selected>每月</option>
+                                    <option value="weekly">每周</option>
+                                    <option value="biweekly">双周</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">每次投资金额</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" class="form-control" id="dcaAmount" value="500" min="10" max="10000">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">投资日期</label>
+                                <input type="number" class="form-control" id="dcaDay" value="1" min="1" max="31" placeholder="每月几号">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 条件定投配置 -->
+                    <div id="conditionalConfig" style="display: none;" class="mt-3">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label class="form-label">触发条件</label>
+                                <select class="form-select" id="conditionType">
+                                    <option value="price_drop">价格下跌</option>
+                                    <option value="drawdown">最大回撤</option>
+                                    <option value="rsi">RSI超卖</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">触发阈值(%)</label>
+                                <input type="number" class="form-control" id="conditionThreshold" value="5" min="1" max="50">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">投资金额</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" class="form-control" id="conditionAmount" value="1000" min="10" max="10000">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-6">
+                                <label class="form-label">冷却期(天)</label>
+                                <input type="number" class="form-control" id="cooldownDays" value="7" min="1" max="90">
+                                <small class="help-text">触发后多少天内不再触发</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 高级选项 -->
+                <div class="config-section">
+                    <h3 class="section-title">
+                        <i class="bi bi-sliders"></i> 高级选项
+                    </h3>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="includeYTD" checked>
+                                <label class="form-check-label" for="includeYTD">
+                                    包含年初至今数据
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="displayIncome" checked>
+                                <label class="form-check-label" for="displayIncome">
+                                    显示收入明细
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="factorAnalysis">
+                                <label class="form-check-label" for="factorAnalysis">
+                                    因子分析
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 提交按钮 -->
+                <div class="text-center mt-4">
+                    <button type="submit" class="btn btn-run" id="runBacktest">
+                        <i class="bi bi-play-circle"></i> 执行回测
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- 加载提示 -->
+    <div class="loading-overlay">
+        <div class="text-center">
+            <div class="spinner-border text-light" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <div class="text-light mt-3">正在执行回测...</div>
+        </div>
+    </div>
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+    // 更新权重显示
+    function updateWeightDisplay() {
+        let totalWeight = 0;
+        $('.weight-input').each(function() {
+            const weight = parseFloat($(this).val()) || 0;
+            totalWeight += weight;
+        });
+        
+        $('#totalWeight').text(totalWeight.toFixed(2));
+        if (Math.abs(totalWeight - 100) < 0.01) {
+            $('.total-weight').removeClass('invalid').addClass('valid');
+            $('#runBacktest').prop('disabled', false);
+        } else {
+            $('.total-weight').removeClass('valid').addClass('invalid');
+            $('#runBacktest').prop('disabled', true);
+        }
+    }
+    
+    // 添加资产
+    $('#addAsset').click(function() {
+        const assetRow = `
+            <div class="asset-row">
+                <div class="row align-items-center">
+                    <div class="col-md-4">
+                        <input type="text" class="form-control asset-symbol" placeholder="股票代码 (如: GOOGL)">
+                    </div>
+                    <div class="col-md-4">
+                        <div class="input-group">
+                            <input type="number" class="form-control weight-input" placeholder="权重" value="0" min="0" max="100" step="0.01">
+                            <span class="input-group-text">%</span>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <input type="text" class="form-control asset-name" placeholder="名称 (可选)" readonly>
+                    </div>
+                    <div class="col-md-1">
+                        <button type="button" class="btn btn-sm btn-danger remove-asset">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        $('#assetsContainer').append(assetRow);
+        updateWeightDisplay();
+    });
+    
+    // 删除资产
+    $(document).on('click', '.remove-asset', function() {
+        $(this).closest('.asset-row').remove();
+        updateWeightDisplay();
+    });
+    
+    // 权重输入变化
+    $(document).on('input', '.weight-input', function() {
+        updateWeightDisplay();
+    });
+    
+    // 股票代码输入后自动获取名称（可选功能）
+    $(document).on('blur', '.asset-symbol', function() {
+        const symbol = $(this).val().toUpperCase();
+        const nameField = $(this).closest('.asset-row').find('.asset-name');
+        
+        if (symbol) {
+            // 可以调用API获取股票名称
+            fetch(`/api/stocks/info/${symbol}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.name) {
+                        nameField.val(data.name);
+                    }
+                })
+                .catch(() => {
+                    nameField.val('');
+                });
+        }
+    });
+    
+    // 现金流类型变化
+    $('#cashflowType').change(function() {
+        const type = $(this).val();
+        $('#periodicConfig, #conditionalConfig').hide();
+        
+        if (type === 'periodic') {
+            $('#periodicConfig').show();
+        } else if (type === 'conditional') {
+            $('#conditionalConfig').show();
+        }
+    });
+    
+    // 提交表单
+    $('#backtestForm').submit(async function(e) {
+        e.preventDefault();
+        
+        // 收集资产数据
+        const assets = [];
+        $('.asset-row').each(function() {
+            const symbol = $(this).find('.asset-symbol').val();
+            const weight = parseFloat($(this).find('.weight-input').val()) || 0;
+            if (symbol && weight > 0) {
+                assets.push({ symbol: symbol.toUpperCase(), weight });
+            }
+        });
+        
+        // 构建请求数据
+        const requestData = {
+            assets: assets,
+            start_date: $('#startDate').val(),
+            end_date: $('#endDate').val(),
+            initial_amount: parseFloat($('#initialAmount').val()),
+            rebalance_frequency: $('#rebalanceFrequency').val(),
+            benchmark: $('#benchmark').val() || null
+        };
+        
+        // 添加现金流配置
+        const cashflowType = $('#cashflowType').val();
+        if (cashflowType === 'periodic') {
+            requestData.cashflow = {
+                type: 'periodic',
+                frequency: $('#dcaFrequency').val(),
+                amount: parseFloat($('#dcaAmount').val()),
+                day: parseInt($('#dcaDay').val())
+            };
+        } else if (cashflowType === 'conditional') {
+            requestData.cashflow = {
+                type: 'conditional',
+                condition: $('#conditionType').val(),
+                threshold: parseFloat($('#conditionThreshold').val()),
+                amount: parseFloat($('#conditionAmount').val()),
+                cooldown: parseInt($('#cooldownDays').val())
+            };
+        }
+        
+        // 显示加载提示
+        $('.loading-overlay').addClass('show');
+        
+        try {
+            // 根据现金流类型选择不同的API端点
+            let apiUrl = '/api/backtest/run';
+            if (cashflowType === 'periodic') {
+                apiUrl = '/api/backtest/dca/periodic';
+                // 调整数据格式
+                requestData.investment_amount = requestData.cashflow.amount;
+                requestData.frequency = requestData.cashflow.frequency;
+                requestData.frequency_config = {
+                    day_of_month: requestData.cashflow.day
+                };
+                delete requestData.cashflow;
+            } else if (cashflowType === 'conditional') {
+                apiUrl = '/api/backtest/dca/conditional';
+                // 调整数据格式
+                requestData.conditions = [{
+                    type: requestData.cashflow.condition,
+                    config: {
+                        drop_percentage: requestData.cashflow.threshold,
+                        drawdown_percentage: requestData.cashflow.threshold,
+                        amount: requestData.cashflow.amount,
+                        cooldown_days: requestData.cashflow.cooldown
+                    }
+                }];
+                delete requestData.cashflow;
+            }
+            
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestData)
+            });
+            
+            const result = await response.json();
+            
+            if (result.status === 'failed') {
+                throw new Error(result.error || '回测失败');
+            }
+            
+            // 保存结果到localStorage并跳转到结果页面
+            localStorage.setItem('backtestResult', JSON.stringify(result));
+            window.location.href = '/backtest';
+            
+        } catch (error) {
+            alert('回测失败: ' + error.message);
+            console.error('Backtest error:', error);
+        } finally {
+            $('.loading-overlay').removeClass('show');
+        }
+    });
+    
+    // 初始化
+    $(document).ready(function() {
+        updateWeightDisplay();
+        
+        // 设置默认日期
+        const today = new Date();
+        const oneYearAgo = new Date(today);
+        oneYearAgo.setFullYear(today.getFullYear() - 1);
+        
+        $('#endDate').val(today.toISOString().split('T')[0]);
+        $('#startDate').val(oneYearAgo.toISOString().split('T')[0]);
+    });
+    </script>
+</body>
+</html>

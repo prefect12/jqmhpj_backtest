@@ -1,0 +1,435 @@
+{% extends "base.html" %}
+
+{% block title %}投资组合配置 - 股票回测分析系统{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">投资组合配置</h5>
+            </div>
+            <div class="card-body">
+                <form id="portfolioForm">
+                    <!-- 组合名称 -->
+                    <div class="mb-3">
+                        <label for="portfolioName" class="form-label">组合名称</label>
+                        <input type="text" class="form-control" id="portfolioName" 
+                               placeholder="例如：科技成长组合" required>
+                    </div>
+                    
+                    <!-- 资产配置 -->
+                    <div class="mb-3">
+                        <label class="form-label">资产配置</label>
+                        <div id="assetsList">
+                            <!-- 资产行将动态添加 -->
+                        </div>
+                        <button type="button" class="btn btn-sm btn-outline-primary mt-2" 
+                                onclick="addAssetRow()">
+                            <i class="fas fa-plus"></i> 添加资产
+                        </button>
+                    </div>
+                    
+                    <!-- 总权重显示 -->
+                    <div class="alert alert-info">
+                        总权重: <span id="totalWeight" class="fw-bold">0%</span>
+                        <span id="weightWarning" class="text-danger ms-2" style="display:none;">
+                            权重必须等于100%
+                        </span>
+                    </div>
+                    
+                    <!-- 回测参数 -->
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="startDate" class="form-label">开始日期</label>
+                            <input type="date" class="form-control" id="startDate" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="endDate" class="form-label">结束日期</label>
+                            <input type="date" class="form-control" id="endDate" required>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="initialAmount" class="form-label">初始金额 ($)</label>
+                        <input type="number" class="form-control" id="initialAmount" 
+                               value="10000" min="1000" max="1000000" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="rebalanceFrequency" class="form-label">再平衡频率</label>
+                        <select class="form-select" id="rebalanceFrequency">
+                            <option value="none">不再平衡</option>
+                            <option value="monthly">每月</option>
+                            <option value="quarterly" selected>每季度</option>
+                            <option value="annually">每年</option>
+                        </select>
+                    </div>
+                    
+                    <!-- 按钮组 -->
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-play"></i> 运行回测
+                        </button>
+                        <button type="button" class="btn btn-success" onclick="savePortfolio()">
+                            <i class="fas fa-save"></i> 保存组合
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="loadTemplate()">
+                            <i class="fas fa-folder-open"></i> 加载模板
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 右侧面板 -->
+    <div class="col-md-4">
+        <!-- 组合预览 -->
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">组合预览</h6>
+            </div>
+            <div class="card-body">
+                <canvas id="pieChart" width="300" height="300"></canvas>
+            </div>
+        </div>
+        
+        <!-- 模板组合 -->
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">推荐模板</h6>
+            </div>
+            <div class="card-body">
+                <div class="list-group">
+                    <button class="list-group-item list-group-item-action" 
+                            onclick="loadPredefinedTemplate('conservative')">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">保守型组合</h6>
+                            <small>低风险</small>
+                        </div>
+                        <small>60% 债券 + 40% 股票</small>
+                    </button>
+                    <button class="list-group-item list-group-item-action" 
+                            onclick="loadPredefinedTemplate('balanced')">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">平衡型组合</h6>
+                            <small>中风险</small>
+                        </div>
+                        <small>股债平衡配置</small>
+                    </button>
+                    <button class="list-group-item list-group-item-action" 
+                            onclick="loadPredefinedTemplate('aggressive')">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">激进型组合</h6>
+                            <small>高风险</small>
+                        </div>
+                        <small>成长股为主</small>
+                    </button>
+                    <button class="list-group-item list-group-item-action" 
+                            onclick="loadPredefinedTemplate('tech')">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">科技股组合</h6>
+                            <small>FAANG</small>
+                        </div>
+                        <small>科技巨头组合</small>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 加载中提示 -->
+<div id="loadingModal" class="modal fade" tabindex="-1" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center py-4">
+                <div class="spinner-border text-primary mb-3" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <h5>正在执行回测...</h5>
+                <p class="text-muted">请稍候，这可能需要几秒钟</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let assetCount = 0;
+let pieChart = null;
+
+// 初始化
+$(document).ready(function() {
+    // 设置默认日期
+    const today = new Date();
+    const oneYearAgo = new Date(today);
+    oneYearAgo.setFullYear(today.getFullYear() - 1);
+    
+    $('#endDate').val(today.toISOString().split('T')[0]);
+    $('#startDate').val(oneYearAgo.toISOString().split('T')[0]);
+    
+    // 初始化饼图
+    const ctx = document.getElementById('pieChart').getContext('2d');
+    pieChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: [],
+            datasets: [{
+                data: [],
+                backgroundColor: [
+                    '#4169E1', '#FF6384', '#36A2EB', '#FFCE56', 
+                    '#4BC0C0', '#9966FF', '#FF9F40', '#FF6384'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+    
+    // 添加默认资产
+    addAssetRow('AAPL', 'Apple Inc.', 40);
+    addAssetRow('MSFT', 'Microsoft Corp.', 30);
+    addAssetRow('GOOGL', 'Alphabet Inc.', 30);
+});
+
+// 添加资产行
+function addAssetRow(symbol = '', name = '', weight = 0) {
+    assetCount++;
+    const assetHtml = `
+        <div class="asset-row mb-2" id="asset-${assetCount}">
+            <div class="row g-2">
+                <div class="col-md-3">
+                    <input type="text" class="form-control asset-symbol" 
+                           placeholder="股票代码" value="${symbol}" 
+                           onblur="validateSymbol(this)" required>
+                </div>
+                <div class="col-md-5">
+                    <input type="text" class="form-control asset-name" 
+                           placeholder="股票名称" value="${name}" readonly>
+                </div>
+                <div class="col-md-3">
+                    <div class="input-group">
+                        <input type="number" class="form-control asset-weight" 
+                               placeholder="权重" value="${weight}" 
+                               min="0" max="100" step="0.1"
+                               onchange="updateTotalWeight()" required>
+                        <span class="input-group-text">%</span>
+                    </div>
+                </div>
+                <div class="col-md-1">
+                    <button type="button" class="btn btn-sm btn-danger" 
+                            onclick="removeAssetRow(${assetCount})">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    $('#assetsList').append(assetHtml);
+    updateTotalWeight();
+}
+
+// 移除资产行
+function removeAssetRow(id) {
+    $(`#asset-${id}`).remove();
+    updateTotalWeight();
+}
+
+// 验证股票代码
+async function validateSymbol(input) {
+    const symbol = input.value.toUpperCase();
+    if (!symbol) return;
+    
+    input.value = symbol;
+    const nameInput = $(input).closest('.asset-row').find('.asset-name');
+    
+    try {
+        const response = await axios.get(`/api/stocks/info/${symbol}`);
+        if (response.data) {
+            nameInput.val(response.data.name);
+            $(input).removeClass('is-invalid').addClass('is-valid');
+        }
+    } catch (error) {
+        nameInput.val('未找到');
+        $(input).removeClass('is-valid').addClass('is-invalid');
+    }
+}
+
+// 更新总权重
+function updateTotalWeight() {
+    let total = 0;
+    $('.asset-weight').each(function() {
+        total += parseFloat($(this).val()) || 0;
+    });
+    
+    $('#totalWeight').text(total.toFixed(1) + '%');
+    
+    if (Math.abs(total - 100) < 0.01) {
+        $('#totalWeight').removeClass('text-danger').addClass('text-success');
+        $('#weightWarning').hide();
+    } else {
+        $('#totalWeight').removeClass('text-success').addClass('text-danger');
+        $('#weightWarning').show();
+    }
+    
+    // 更新饼图
+    updatePieChart();
+}
+
+// 更新饼图
+function updatePieChart() {
+    const labels = [];
+    const data = [];
+    
+    $('.asset-row').each(function() {
+        const symbol = $(this).find('.asset-symbol').val();
+        const weight = parseFloat($(this).find('.asset-weight').val()) || 0;
+        
+        if (symbol && weight > 0) {
+            labels.push(symbol);
+            data.push(weight);
+        }
+    });
+    
+    pieChart.data.labels = labels;
+    pieChart.data.datasets[0].data = data;
+    pieChart.update();
+}
+
+// 加载预定义模板
+function loadPredefinedTemplate(type) {
+    $('#assetsList').empty();
+    assetCount = 0;
+    
+    const templates = {
+        conservative: [
+            {symbol: 'BND', name: 'Vanguard Total Bond Market ETF', weight: 60},
+            {symbol: 'VTI', name: 'Vanguard Total Stock Market ETF', weight: 30},
+            {symbol: 'VXUS', name: 'Vanguard Total International Stock ETF', weight: 10}
+        ],
+        balanced: [
+            {symbol: 'VTI', name: 'Vanguard Total Stock Market ETF', weight: 40},
+            {symbol: 'BND', name: 'Vanguard Total Bond Market ETF', weight: 30},
+            {symbol: 'VXUS', name: 'Vanguard Total International Stock ETF', weight: 20},
+            {symbol: 'VNQ', name: 'Vanguard Real Estate ETF', weight: 10}
+        ],
+        aggressive: [
+            {symbol: 'QQQ', name: 'Invesco QQQ Trust', weight: 30},
+            {symbol: 'VGT', name: 'Vanguard Information Technology ETF', weight: 25},
+            {symbol: 'ARKK', name: 'ARK Innovation ETF', weight: 20},
+            {symbol: 'VWO', name: 'Vanguard Emerging Markets ETF', weight: 15},
+            {symbol: 'VNQ', name: 'Vanguard Real Estate ETF', weight: 10}
+        ],
+        tech: [
+            {symbol: 'AAPL', name: 'Apple Inc.', weight: 25},
+            {symbol: 'MSFT', name: 'Microsoft Corporation', weight: 25},
+            {symbol: 'GOOGL', name: 'Alphabet Inc.', weight: 20},
+            {symbol: 'NVDA', name: 'NVIDIA Corporation', weight: 15},
+            {symbol: 'META', name: 'Meta Platforms Inc.', weight: 15}
+        ]
+    };
+    
+    const template = templates[type];
+    if (template) {
+        template.forEach(asset => {
+            addAssetRow(asset.symbol, asset.name, asset.weight);
+        });
+        
+        // 更新组合名称
+        const names = {
+            conservative: '保守型投资组合',
+            balanced: '平衡型投资组合',
+            aggressive: '激进成长型组合',
+            tech: '科技股投资组合'
+        };
+        $('#portfolioName').val(names[type]);
+    }
+}
+
+// 提交表单
+$('#portfolioForm').on('submit', async function(e) {
+    e.preventDefault();
+    
+    // 验证权重
+    const totalWeight = $('.asset-weight').toArray()
+        .reduce((sum, el) => sum + (parseFloat(el.value) || 0), 0);
+    
+    if (Math.abs(totalWeight - 100) > 0.01) {
+        alert('权重总和必须等于100%');
+        return;
+    }
+    
+    // 收集资产数据
+    const assets = [];
+    $('.asset-row').each(function() {
+        const symbol = $(this).find('.asset-symbol').val();
+        const name = $(this).find('.asset-name').val();
+        const weight = parseFloat($(this).find('.asset-weight').val());
+        
+        if (symbol && weight > 0) {
+            assets.push({symbol, name, weight});
+        }
+    });
+    
+    const backtestConfig = {
+        assets: assets,
+        start_date: $('#startDate').val(),
+        end_date: $('#endDate').val(),
+        initial_amount: parseFloat($('#initialAmount').val()),
+        rebalance_frequency: $('#rebalanceFrequency').val()
+    };
+    
+    // 显示加载提示
+    $('#loadingModal').modal('show');
+    
+    try {
+        const response = await axios.post('/api/backtest/run', backtestConfig);
+        
+        // 保存结果到localStorage并跳转
+        localStorage.setItem('backtestResult', JSON.stringify(response.data));
+        localStorage.setItem('backtestConfig', JSON.stringify(backtestConfig));
+        
+        window.location.href = '/backtest';
+    } catch (error) {
+        $('#loadingModal').modal('hide');
+        alert('回测执行失败: ' + (error.response?.data?.error || error.message));
+    }
+});
+
+// 保存组合
+async function savePortfolio() {
+    const portfolioData = {
+        name: $('#portfolioName').val(),
+        assets: []
+    };
+    
+    $('.asset-row').each(function() {
+        const symbol = $(this).find('.asset-symbol').val();
+        const name = $(this).find('.asset-name').val();
+        const weight = parseFloat($(this).find('.asset-weight').val());
+        
+        if (symbol && weight > 0) {
+            portfolioData.assets.push({symbol, name, weight});
+        }
+    });
+    
+    try {
+        const response = await axios.post('/api/portfolio/create', portfolioData);
+        alert('组合保存成功！');
+    } catch (error) {
+        alert('保存失败: ' + (error.response?.data?.error || error.message));
+    }
+}
+</script>
+{% endblock %}

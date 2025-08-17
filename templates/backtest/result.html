@@ -1,0 +1,678 @@
+{% extends "base.html" %}
+
+{% block title %}回测结果 - 股票回测分析系统{% endblock %}
+
+{% block extra_css %}
+<style>
+    .highlights-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .highlight-item {
+        text-align: center;
+        padding: 15px;
+    }
+    
+    .highlight-value {
+        font-size: 2rem;
+        font-weight: bold;
+        margin: 5px 0;
+    }
+    
+    .highlight-label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+    
+    .chart-container {
+        position: relative;
+        height: 400px;
+        margin: 20px 0;
+    }
+    
+    .table-container {
+        max-height: 600px;
+        overflow-y: auto;
+    }
+    
+    .performance-badge {
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-weight: 600;
+    }
+    
+    .performance-positive {
+        background-color: #d4edda;
+        color: #155724;
+    }
+    
+    .performance-negative {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- 顶部Highlights -->
+<div class="highlights-card">
+    <div class="row">
+        <div class="col-md-3 highlight-item">
+            <div class="highlight-label">总收益率</div>
+            <div class="highlight-value" id="totalReturn">--</div>
+        </div>
+        <div class="col-md-3 highlight-item">
+            <div class="highlight-label">年化收益率</div>
+            <div class="highlight-value" id="annualizedReturn">--</div>
+        </div>
+        <div class="col-md-3 highlight-item">
+            <div class="highlight-label">最大回撤</div>
+            <div class="highlight-value" id="maxDrawdown">--</div>
+        </div>
+        <div class="col-md-3 highlight-item">
+            <div class="highlight-label">夏普比率</div>
+            <div class="highlight-value" id="sharpeRatio">--</div>
+        </div>
+    </div>
+</div>
+
+<!-- 主要内容区 -->
+<div class="row">
+    <!-- 左侧图表 -->
+    <div class="col-lg-8">
+        <!-- 投资组合增长图 -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Portfolio Growth</h5>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="growthChart"></canvas>
+                </div>
+                <div class="form-check form-switch mt-2">
+                    <input class="form-check-input" type="checkbox" id="logScale">
+                    <label class="form-check-label" for="logScale">
+                        对数刻度
+                    </label>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 年度收益柱状图 -->
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="mb-0">Annual Returns</h5>
+            </div>
+            <div class="card-body">
+                <div class="chart-container" style="height: 300px;">
+                    <canvas id="annualReturnsChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 回撤图 -->
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="mb-0">Drawdowns</h5>
+            </div>
+            <div class="card-body">
+                <div class="chart-container" style="height: 250px;">
+                    <canvas id="drawdownChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 右侧数据表格 -->
+    <div class="col-lg-4">
+        <!-- 性能摘要 -->
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">Performance Summary</h6>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-sm mb-0">
+                    <tbody id="performanceSummary">
+                        <!-- 动态填充 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- 风险指标 -->
+        <div class="card mt-3">
+            <div class="card-header">
+                <h6 class="mb-0">Risk Metrics</h6>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-sm mb-0">
+                    <tbody id="riskMetrics">
+                        <!-- 动态填充 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- 资产配置 -->
+        <div class="card mt-3">
+            <div class="card-header">
+                <h6 class="mb-0">Portfolio Assets</h6>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-sm mb-0">
+                    <thead>
+                        <tr>
+                            <th>资产</th>
+                            <th>权重</th>
+                            <th>贡献</th>
+                        </tr>
+                    </thead>
+                    <tbody id="assetAllocation">
+                        <!-- 动态填充 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 详细数据表格 -->
+<div class="card mt-4">
+    <div class="card-header">
+        <ul class="nav nav-tabs card-header-tabs">
+            <li class="nav-item">
+                <a class="nav-link active" data-bs-toggle="tab" href="#annualReturnsTab">
+                    Annual Returns
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-bs-toggle="tab" href="#monthlyReturnsTab">
+                    Monthly Returns
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-bs-toggle="tab" href="#drawdownsTab">
+                    Drawdown Periods
+                </a>
+            </li>
+        </ul>
+    </div>
+    <div class="card-body">
+        <div class="tab-content">
+            <div class="tab-pane fade show active" id="annualReturnsTab">
+                <div class="table-container">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>年份</th>
+                                <th>起始价值</th>
+                                <th>结束价值</th>
+                                <th>年度收益</th>
+                                <th>波动率</th>
+                            </tr>
+                        </thead>
+                        <tbody id="annualReturnsTable">
+                            <!-- 动态填充 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="monthlyReturnsTab">
+                <div class="table-container">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>年份</th>
+                                <th>1月</th>
+                                <th>2月</th>
+                                <th>3月</th>
+                                <th>4月</th>
+                                <th>5月</th>
+                                <th>6月</th>
+                                <th>7月</th>
+                                <th>8月</th>
+                                <th>9月</th>
+                                <th>10月</th>
+                                <th>11月</th>
+                                <th>12月</th>
+                                <th>年度</th>
+                            </tr>
+                        </thead>
+                        <tbody id="monthlyReturnsTable">
+                            <!-- 动态填充 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="drawdownsTab">
+                <div class="table-container">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>排名</th>
+                                <th>开始日期</th>
+                                <th>谷底日期</th>
+                                <th>恢复日期</th>
+                                <th>回撤幅度</th>
+                                <th>持续天数</th>
+                                <th>恢复天数</th>
+                            </tr>
+                        </thead>
+                        <tbody id="drawdownsTable">
+                            <!-- 动态填充 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 操作按钮 -->
+<div class="mt-4 d-flex gap-2">
+    <button class="btn btn-primary" onclick="exportResults()">
+        <i class="fas fa-download"></i> 导出报告
+    </button>
+    <button class="btn btn-secondary" onclick="window.location.href='/portfolio'">
+        <i class="fas fa-redo"></i> 重新配置
+    </button>
+    <button class="btn btn-info" onclick="compareWithBenchmark()">
+        <i class="fas fa-chart-bar"></i> 对比基准
+    </button>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let backtestResult = null;
+let backtestConfig = null;
+let growthChart = null;
+let annualReturnsChart = null;
+let drawdownChart = null;
+
+$(document).ready(function() {
+    // 从localStorage获取回测结果
+    const resultStr = localStorage.getItem('backtestResult');
+    const configStr = localStorage.getItem('backtestConfig');
+    
+    if (resultStr && configStr) {
+        backtestResult = JSON.parse(resultStr);
+        backtestConfig = JSON.parse(configStr);
+        displayResults();
+    } else {
+        // 如果没有结果，显示示例数据或重定向
+        loadSampleData();
+    }
+});
+
+function displayResults() {
+    if (!backtestResult) return;
+    
+    // 显示Highlights
+    const perf = backtestResult.performance_summary || {};
+    const risk = backtestResult.risk_metrics || {};
+    
+    $('#totalReturn').text(formatPercent(perf.total_return_pct));
+    $('#annualizedReturn').text(formatPercent(perf.annualized_return_pct));
+    $('#maxDrawdown').text(formatPercent(risk.max_drawdown_pct));
+    $('#sharpeRatio').text((risk.sharpe_ratio || 0).toFixed(2));
+    
+    // 根据正负值添加颜色
+    if (perf.total_return_pct >= 0) {
+        $('#totalReturn').addClass('text-success');
+    } else {
+        $('#totalReturn').addClass('text-danger');
+    }
+    
+    // 显示性能摘要
+    displayPerformanceSummary();
+    
+    // 显示风险指标
+    displayRiskMetrics();
+    
+    // 显示资产配置
+    displayAssetAllocation();
+    
+    // 绘制图表
+    drawGrowthChart();
+    drawAnnualReturnsChart();
+    drawDrawdownChart();
+    
+    // 填充表格
+    fillAnnualReturnsTable();
+}
+
+function displayPerformanceSummary() {
+    const perf = backtestResult.performance_summary || {};
+    const config = backtestResult.config_summary || {};
+    
+    const rows = [
+        {label: '起始日期', value: config.start_date},
+        {label: '结束日期', value: config.end_date},
+        {label: '初始金额', value: formatCurrency(perf.start_value)},
+        {label: '最终价值', value: formatCurrency(perf.end_value)},
+        {label: '总收益', value: formatCurrency(perf.end_value - perf.start_value)},
+        {label: '总收益率', value: formatPercent(perf.total_return_pct), colored: true},
+        {label: '年化收益率', value: formatPercent(perf.annualized_return_pct), colored: true}
+    ];
+    
+    let html = '';
+    rows.forEach(row => {
+        let valueClass = '';
+        if (row.colored) {
+            const numValue = parseFloat(row.value);
+            valueClass = numValue >= 0 ? 'text-success' : 'text-danger';
+        }
+        html += `
+            <tr>
+                <td>${row.label}</td>
+                <td class="text-end fw-bold ${valueClass}">${row.value}</td>
+            </tr>
+        `;
+    });
+    
+    $('#performanceSummary').html(html);
+}
+
+function displayRiskMetrics() {
+    const risk = backtestResult.risk_metrics || {};
+    
+    const rows = [
+        {label: '年化波动率', value: formatPercent(risk.volatility_annual_pct)},
+        {label: '最大回撤', value: formatPercent(risk.max_drawdown_pct), colored: true},
+        {label: '夏普比率', value: (risk.sharpe_ratio || 0).toFixed(3)},
+        {label: '索提诺比率', value: (risk.sortino_ratio || 0).toFixed(3)},
+        {label: '正收益率', value: formatPercent(risk.positive_rate_pct)}
+    ];
+    
+    let html = '';
+    rows.forEach(row => {
+        let valueClass = '';
+        if (row.colored) {
+            valueClass = 'text-danger';
+        }
+        html += `
+            <tr>
+                <td>${row.label}</td>
+                <td class="text-end fw-bold ${valueClass}">${row.value}</td>
+            </tr>
+        `;
+    });
+    
+    $('#riskMetrics').html(html);
+}
+
+function displayAssetAllocation() {
+    const assets = backtestResult.portfolio_composition || [];
+    
+    let html = '';
+    assets.forEach(asset => {
+        html += `
+            <tr>
+                <td>${asset.symbol}</td>
+                <td>${asset.weight}%</td>
+                <td>--</td>
+            </tr>
+        `;
+    });
+    
+    $('#assetAllocation').html(html);
+}
+
+function drawGrowthChart() {
+    const ctx = document.getElementById('growthChart').getContext('2d');
+    const timeSeries = backtestResult.time_series || [];
+    
+    const labels = timeSeries.map(d => d.date);
+    const values = timeSeries.map(d => d.value);
+    
+    growthChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Portfolio Value',
+                data: values,
+                borderColor: '#4169E1',
+                backgroundColor: 'rgba(65, 105, 225, 0.1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return 'Value: ' + formatCurrency(context.parsed.y);
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: false,
+                    ticks: {
+                        callback: function(value) {
+                            return formatCurrency(value);
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+function drawAnnualReturnsChart() {
+    const ctx = document.getElementById('annualReturnsChart').getContext('2d');
+    const annualReturns = backtestResult.annual_returns || [];
+    
+    const labels = annualReturns.map(d => d.year);
+    const values = annualReturns.map(d => d.annual_return);
+    const colors = values.map(v => v >= 0 ? '#28a745' : '#dc3545');
+    
+    annualReturnsChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Annual Return (%)',
+                data: values,
+                backgroundColor: colors
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return formatPercent(context.parsed.y);
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    ticks: {
+                        callback: function(value) {
+                            return value + '%';
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+function drawDrawdownChart() {
+    const ctx = document.getElementById('drawdownChart').getContext('2d');
+    const timeSeries = backtestResult.time_series || [];
+    
+    // 计算回撤
+    let peak = timeSeries[0]?.value || 0;
+    const drawdowns = timeSeries.map(d => {
+        if (d.value > peak) peak = d.value;
+        return peak > 0 ? ((d.value - peak) / peak * 100) : 0;
+    });
+    
+    drawdownChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: timeSeries.map(d => d.date),
+            datasets: [{
+                label: 'Drawdown (%)',
+                data: drawdowns,
+                borderColor: '#dc3545',
+                backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                borderWidth: 1,
+                fill: true,
+                tension: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    max: 0,
+                    ticks: {
+                        callback: function(value) {
+                            return value + '%';
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+function fillAnnualReturnsTable() {
+    const annualReturns = backtestResult.annual_returns || [];
+    
+    let html = '';
+    annualReturns.forEach(year => {
+        const returnClass = year.annual_return >= 0 ? 'text-success' : 'text-danger';
+        html += `
+            <tr>
+                <td>${year.year}</td>
+                <td>${formatCurrency(year.start_value)}</td>
+                <td>${formatCurrency(year.end_value)}</td>
+                <td class="${returnClass}">${formatPercent(year.annual_return)}</td>
+                <td>${formatPercent(year.volatility)}</td>
+            </tr>
+        `;
+    });
+    
+    $('#annualReturnsTable').html(html);
+}
+
+// 对数刻度切换
+$('#logScale').change(function() {
+    if (growthChart) {
+        growthChart.options.scales.y.type = this.checked ? 'logarithmic' : 'linear';
+        growthChart.update();
+    }
+});
+
+// 格式化函数
+function formatPercent(value) {
+    if (value == null) return '--';
+    return (value >= 0 ? '+' : '') + value.toFixed(2) + '%';
+}
+
+function formatCurrency(value) {
+    if (value == null) return '--';
+    return '$' + value.toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
+}
+
+// 加载示例数据
+function loadSampleData() {
+    // 示例数据用于开发测试
+    backtestResult = {
+        performance_summary: {
+            start_value: 10000,
+            end_value: 15234.56,
+            total_return_pct: 52.35,
+            annualized_return_pct: 11.28
+        },
+        risk_metrics: {
+            volatility_annual_pct: 18.45,
+            max_drawdown_pct: -15.67,
+            sharpe_ratio: 0.61,
+            sortino_ratio: 0.85,
+            positive_rate_pct: 58.33
+        },
+        portfolio_composition: [
+            {symbol: 'AAPL', weight: 40},
+            {symbol: 'MSFT', weight: 30},
+            {symbol: 'GOOGL', weight: 30}
+        ],
+        annual_returns: [
+            {year: 2020, start_value: 10000, end_value: 11234, annual_return: 12.34, volatility: 15.67},
+            {year: 2021, start_value: 11234, end_value: 13567, annual_return: 20.76, volatility: 18.23},
+            {year: 2022, start_value: 13567, end_value: 12345, annual_return: -9.01, volatility: 22.45},
+            {year: 2023, start_value: 12345, end_value: 15234.56, annual_return: 23.41, volatility: 16.78}
+        ],
+        time_series: generateSampleTimeSeries()
+    };
+    
+    displayResults();
+}
+
+function generateSampleTimeSeries() {
+    const series = [];
+    let value = 10000;
+    const startDate = new Date('2020-01-01');
+    
+    for (let i = 0; i < 100; i++) {
+        const date = new Date(startDate);
+        date.setDate(date.getDate() + i * 10);
+        
+        // 随机波动
+        value = value * (1 + (Math.random() - 0.45) * 0.05);
+        
+        series.push({
+            date: date.toISOString().split('T')[0],
+            value: value
+        });
+    }
+    
+    return series;
+}
+
+// 导出结果
+function exportResults() {
+    // 实现导出功能
+    alert('导出功能开发中...');
+}
+
+// 对比基准
+function compareWithBenchmark() {
+    // 实现基准对比功能
+    alert('基准对比功能开发中...');
+}
+</script>
+{% endblock %}

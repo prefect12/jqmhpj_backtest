@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3.12:*)",
+      "Bash(source:*)",
+      "Bash(pip install:*)",
+      "Bash(python -m pytest tests/services/dca_service_test.py -v)",
+      "Bash(python -m pytest tests/services/dca_service_test.py::TestDCAService::test_run_periodic_dca_error_handling -v)",
+      "Bash(python -m pytest tests/services/backtest_service_test.py -v)",
+      "Bash(python -m pytest tests/ -v --cov=app --cov-report=term-missing)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
